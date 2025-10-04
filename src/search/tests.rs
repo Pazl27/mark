@@ -262,6 +262,63 @@ mod tests {
     }
 
     #[test]
+    fn test_expand_tilde_home_only() {
+        // Mock HOME environment variable for testing
+        std::env::set_var("HOME", "/home/testuser");
+        
+        let result = super::expand_tilde("~");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), PathBuf::from("/home/testuser"));
+        
+        // Clean up
+        std::env::remove_var("HOME");
+    }
+
+    #[test]
+    fn test_expand_tilde_with_subpath() {
+        // Mock HOME environment variable for testing
+        std::env::set_var("HOME", "/home/testuser");
+        
+        let result = super::expand_tilde("~/Documents/markdown");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), PathBuf::from("/home/testuser/Documents/markdown"));
+        
+        // Clean up
+        std::env::remove_var("HOME");
+    }
+
+    #[test]
+    fn test_expand_tilde_no_expansion_needed() {
+        let result = super::expand_tilde("/absolute/path");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), PathBuf::from("/absolute/path"));
+
+        let result = super::expand_tilde("relative/path");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), PathBuf::from("relative/path"));
+    }
+
+    #[test]
+    fn test_expand_tilde_missing_home_env() {
+        // Save original HOME value
+        let original_home = std::env::var("HOME").ok();
+        
+        // Remove HOME environment variable
+        std::env::remove_var("HOME");
+        
+        let result = super::expand_tilde("~");
+        assert!(result.is_err());
+        
+        let result = super::expand_tilde("~/Documents");
+        assert!(result.is_err());
+        
+        // Restore original HOME value
+        if let Some(home) = original_home {
+            std::env::set_var("HOME", home);
+        }
+    }
+
+    #[test]
     fn test_integration_full_workflow() {
         let temp_dir = TempDir::new().unwrap();
         let dir_path = temp_dir.path();

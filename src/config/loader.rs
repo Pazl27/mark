@@ -6,10 +6,12 @@ use crate::error::{ConfigError, ConfigResult, MarkError, Result};
 
 #[cfg(not(test))]
 const GITHUB_REPO: &str = "Pazl27/mark";
+// TODO: Change to correct file
 #[cfg(not(test))]
 const CONFIG_FILE_PATH: &str = "config/default.toml";
 #[cfg(not(test))]
 const GITHUB_RAW_URL: &str = "https://raw.githubusercontent.com";
+// TODO: Change to correct file
 #[cfg(not(test))]
 const DOCUMENTATION_URL: &str = "https://github.com/Pazl27/mark/blob/main/docs/configuration.md";
 

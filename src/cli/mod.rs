@@ -2,6 +2,7 @@ pub mod parser;
 
 use crate::error::Result;
 use crate::config::{get_default_config_path, ConfigLoader};
+use crate::search::find_markdown_files;
 use clap::Parser;
 
 /// Initialize and run the CLI application
@@ -30,7 +31,7 @@ pub fn run() -> Result<()> {
                 // TODO: Launch markdown viewer with the specific file
                 Ok(())
             } else if path.is_dir() {
-                println!("Browsing directory: {}", path.display());
+                let files = find_markdown_files(path.to_str().unwrap())?;
                 Ok(())
             } else {
                 eprintln!("Error: Path does not exist: {}", path.display());
@@ -45,6 +46,6 @@ pub fn run() -> Result<()> {
 }
 
 fn search_home_directory() -> Result<()> {
-    println!("Searching for markdown files in home directory...");
+    let files = find_markdown_files("~")?;
     Ok(())
 }

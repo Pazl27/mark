@@ -1,9 +1,4 @@
-mod cli;
-mod config;
-mod error;
-mod search;
-
-use error::{MarkError, Result};
+use mark::{cli, error::{MarkError, Result}};
 use std::error::Error;
 use std::process;
 
