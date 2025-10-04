@@ -1,23 +1,23 @@
 mod cli;
+mod config;
 mod error;
 
-use error::{CliError, Result};
+use error::{MarkError, Result};
 use std::error::Error;
 use std::process;
 
-#[tokio::main]
-async fn main() {
-    if let Err(e) = run_application().await {
+fn main() {
+    if let Err(e) = run_application() {
         handle_error(e);
     }
 }
 
-async fn run_application() -> Result<()> {
-    cli::run().await?;
+fn run_application() -> Result<()> {
+    cli::run()?;
     Ok(())
 }
 
-fn handle_error(error: CliError) {
+fn handle_error(error: MarkError) {
     eprintln!("Error: {}", error);
 
     let mut source = error.source();
@@ -31,27 +31,27 @@ fn handle_error(error: CliError) {
     process::exit(error.exit_code());
 }
 
-fn print_error_suggestions(error: &CliError) {
+fn print_error_suggestions(error: &MarkError) {
     match error {
-        CliError::FileNotFound { path } => {
+        MarkError::FileNotFound { path } => {
             eprintln!();
             eprintln!("Suggestions:");
             eprintln!("  • Check if the file path is correct: {}", path.display());
             eprintln!("  • Ensure the file exists and you have read permissions");
         }
-        CliError::InvalidFileFormat { path } => {
+        MarkError::InvalidFileFormat { path } => {
             eprintln!();
             eprintln!("Suggestions:");
             eprintln!("  • Make sure '{}' is a markdown file", path.display());
             eprintln!("  • Supported extensions: .md, .markdown");
         }
-        CliError::InvalidWidth { .. } => {
+        MarkError::InvalidWidth { .. } => {
             eprintln!();
             eprintln!("Suggestions:");
             eprintln!("  • Use a width value between 20 and 200 characters");
             eprintln!("  • Example: mark --width 80 README.md");
         }
-        CliError::Config { .. } => {
+        MarkError::Config { .. } => {
             eprintln!();
             eprintln!("Suggestions:");
             eprintln!("  • Check your configuration file syntax");
@@ -71,12 +71,12 @@ mod tests {
 
     #[test]
     fn test_error_exit_codes() {
-        let file_not_found = CliError::FileNotFound {
+        let file_not_found = MarkError::FileNotFound {
             path: PathBuf::from("nonexistent.md"),
         };
         assert_eq!(file_not_found.exit_code(), 2);
 
-        let invalid_width = CliError::InvalidWidth { width: 300 };
+        let invalid_width = MarkError::InvalidWidth { width: 300 };
         assert_eq!(invalid_width.exit_code(), 22);
     }
 }

@@ -1,15 +1,21 @@
 pub mod parser;
 
 use crate::error::Result;
+use crate::config::{get_default_config_path, ConfigLoader};
 use clap::Parser;
 
 /// Initialize and run the CLI application
-pub async fn run() -> Result<()> {
+pub fn run() -> Result<()> {
     let cli = parser::Cli::parse();
 
-    if let Some(_config_path) = &cli.config {
-        // TODO: Load configuration from file
-    }
+    let config_path = if let Some(path) = &cli.config {
+        path.clone()
+    } else {
+        get_default_config_path()?
+    };
+
+    let loader = ConfigLoader::with_path(config_path)?;
+    let config = loader.config();
 
     if cli.all {
         search_home_directory()?;
