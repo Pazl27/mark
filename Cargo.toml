@@ -2,5 +2,41 @@
 name = "mark"
 version = "0.1.0"
 edition = "2021"
+authors = ["Pazl27"]
+description = "A terminal-based markdown viewer and renderer"
+readme = "README.md"
+homepage = "https://github.com/Pazl27/mark"
+repository = "https://github.com/Pazl27/mark"
+license = "MIT"
+keywords = ["markdown", "tui", "terminal", "viewer", "cli"]
+categories = ["command-line-utilities", "text-processing"]
+rust-version = "1.70"
 
 [dependencies]
+clap = { version = "4.5.48", features = ["derive", "cargo"] }
+crossterm = "0.29.0"
+ratatui = { version = "0.29.0", features = ["all-widgets"] }
+syntect = { version = "5.3.0", default-features = false, features = ["default-fancy"] }
+thiserror = "2.0.17"
+walkdir = "2.5.0"
+serde = { version = "1.0.214", features = ["derive"] }
+toml = "0.8.19"
+
+tokio = { version = "1.0", features = ["full"] }
+
+[profile.release]
+# Optimize for size and performance
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+# Faster compilation during development
+opt-level = 0
+debug = true
+
+[[bin]]
+name = "mark"
+path = "src/main.rs"
