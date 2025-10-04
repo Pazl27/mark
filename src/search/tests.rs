@@ -1,8 +1,8 @@
 use super::*;
-use std::path::PathBuf;
-use tempfile::TempDir;
 use std::fs::{self, File};
 use std::io::Write;
+use std::path::PathBuf;
+use tempfile::TempDir;
 
 #[cfg(test)]
 mod tests {
@@ -249,7 +249,7 @@ mod tests {
     #[test]
     fn test_markdown_file_edge_case_names() {
         let paths = vec![
-            PathBuf::from(".md"),           // Just extension
+            PathBuf::from(".md"),            // Just extension
             PathBuf::from("file.md.backup"), // Multiple dots
             PathBuf::from("a.very.long.filename.with.many.dots.md"),
         ];
@@ -265,11 +265,11 @@ mod tests {
     fn test_expand_tilde_home_only() {
         // Mock HOME environment variable for testing
         std::env::set_var("HOME", "/home/testuser");
-        
+
         let result = super::expand_tilde("~");
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), PathBuf::from("/home/testuser"));
-        
+
         // Clean up
         std::env::remove_var("HOME");
     }
@@ -278,11 +278,14 @@ mod tests {
     fn test_expand_tilde_with_subpath() {
         // Mock HOME environment variable for testing
         std::env::set_var("HOME", "/home/testuser");
-        
+
         let result = super::expand_tilde("~/Documents/markdown");
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), PathBuf::from("/home/testuser/Documents/markdown"));
-        
+        assert_eq!(
+            result.unwrap(),
+            PathBuf::from("/home/testuser/Documents/markdown")
+        );
+
         // Clean up
         std::env::remove_var("HOME");
     }
@@ -302,16 +305,16 @@ mod tests {
     fn test_expand_tilde_missing_home_env() {
         // Save original HOME value
         let original_home = std::env::var("HOME").ok();
-        
+
         // Remove HOME environment variable
         std::env::remove_var("HOME");
-        
+
         let result = super::expand_tilde("~");
         assert!(result.is_err());
-        
+
         let result = super::expand_tilde("~/Documents");
         assert!(result.is_err());
-        
+
         // Restore original HOME value
         if let Some(home) = original_home {
             std::env::set_var("HOME", home);
@@ -334,13 +337,17 @@ mod tests {
 
         // Create markdown files with content
         let mut readme = File::create(dir_path.join("README.md")).unwrap();
-        readme.write_all(b"# Project\n\nThis is a test project.").unwrap();
+        readme
+            .write_all(b"# Project\n\nThis is a test project.")
+            .unwrap();
 
         let mut doc1 = File::create(sub_dir1.join("guide.md")).unwrap();
-        doc1.write_all(b"# User Guide\n\n## Installation\n\nInstall the software.").unwrap();
+        doc1.write_all(b"# User Guide\n\n## Installation\n\nInstall the software.")
+            .unwrap();
 
         let mut doc2 = File::create(sub_dir3.join("advanced.md")).unwrap();
-        doc2.write_all(b"# Advanced Usage\n\nFor power users.").unwrap();
+        doc2.write_all(b"# Advanced Usage\n\nFor power users.")
+            .unwrap();
 
         // Create non-markdown files (should be ignored)
         File::create(dir_path.join("config.toml")).unwrap();
@@ -377,12 +384,24 @@ mod tests {
 
         // Verify specific content
         let readme_file = files.iter().find(|f| f.name == "README.md").unwrap();
-        assert!(readme_file.content.as_ref().unwrap().contains("test project"));
+        assert!(readme_file
+            .content
+            .as_ref()
+            .unwrap()
+            .contains("test project"));
 
         let guide_file = files.iter().find(|f| f.name == "guide.md").unwrap();
-        assert!(guide_file.content.as_ref().unwrap().contains("Installation"));
+        assert!(guide_file
+            .content
+            .as_ref()
+            .unwrap()
+            .contains("Installation"));
 
         let advanced_file = files.iter().find(|f| f.name == "advanced.md").unwrap();
-        assert!(advanced_file.content.as_ref().unwrap().contains("power users"));
+        assert!(advanced_file
+            .content
+            .as_ref()
+            .unwrap()
+            .contains("power users"));
     }
 }

@@ -36,12 +36,18 @@ pub enum ConfigError {
     FileNotFound { path: PathBuf },
 
     #[error("Failed to parse TOML: {message} at line {line}, column {col}")]
-    TomlParseError { message: String, line: usize, col: usize },
+    TomlParseError {
+        message: String,
+        line: usize,
+        col: usize,
+    },
 
     #[error("Missing required field: '{field}' in section [{section}]")]
     MissingField { field: String, section: String },
 
-    #[error("Invalid value for field '{field}' in section [{section}]: {value}. Expected: {expected}")]
+    #[error(
+        "Invalid value for field '{field}' in section [{section}]: {value}. Expected: {expected}"
+    )]
     InvalidValue {
         field: String,
         section: String,
@@ -52,7 +58,9 @@ pub enum ConfigError {
     #[error("Missing required section: [{section}]")]
     MissingSection { section: String },
 
-    #[error("Invalid color format: '{color}' in field '{field}'. Expected hex format like '#ffffff'")]
+    #[error(
+        "Invalid color format: '{color}' in field '{field}'. Expected hex format like '#ffffff'"
+    )]
     InvalidColor { color: String, field: String },
 
     #[error("Invalid theme: '{theme}'. Must be 'dark' or 'light'")]
@@ -119,12 +127,7 @@ impl ConfigError {
     }
 
     /// Create an invalid value error
-    pub fn invalid_value<S: Into<String>>(
-        field: S,
-        section: S,
-        value: S,
-        expected: S,
-    ) -> Self {
+    pub fn invalid_value<S: Into<String>>(field: S, section: S, value: S, expected: S) -> Self {
         Self::InvalidValue {
             field: field.into(),
             section: section.into(),

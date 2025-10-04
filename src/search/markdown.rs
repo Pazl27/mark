@@ -1,5 +1,5 @@
-use std::{io::{Read}, path::PathBuf};
 use crate::error::Result;
+use std::{io::Read, path::PathBuf};
 
 pub struct MarkdownFile {
     pub path: PathBuf,

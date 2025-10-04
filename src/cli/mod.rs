@@ -1,7 +1,7 @@
 pub mod parser;
 
-use crate::error::Result;
 use crate::config::{get_default_config_path, ConfigLoader};
+use crate::error::Result;
 use crate::search::find_markdown_files;
 use clap::Parser;
 

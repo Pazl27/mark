@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::error::{ConfigError, ConfigResult};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ColorTheme {
@@ -154,7 +154,7 @@ fn validate_hex_color(color: &str, field_name: &str) -> ConfigResult<()> {
 /// Parse hex color to RGB values
 pub fn hex_to_rgb(hex: &str) -> ConfigResult<(u8, u8, u8)> {
     validate_hex_color(hex, "color")?;
-    
+
     let hex_part = &hex[1..];
     let r = u8::from_str_radix(&hex_part[0..2], 16)
         .map_err(|_| ConfigError::invalid_color(hex, "color"))?;
@@ -162,7 +162,7 @@ pub fn hex_to_rgb(hex: &str) -> ConfigResult<(u8, u8, u8)> {
         .map_err(|_| ConfigError::invalid_color(hex, "color"))?;
     let b = u8::from_str_radix(&hex_part[4..6], 16)
         .map_err(|_| ConfigError::invalid_color(hex, "color"))?;
-    
+
     Ok((r, g, b))
 }
 
@@ -268,14 +268,17 @@ mod tests {
 
         let result = dark_colors.validate();
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), ConfigError::InvalidColor { .. }));
+        assert!(matches!(
+            result.unwrap_err(),
+            ConfigError::InvalidColor { .. }
+        ));
     }
 
     #[test]
     fn test_all_colors_iteration() {
         let dark_colors = create_valid_dark_colors();
         let all_colors = dark_colors.all_colors();
-        
+
         assert_eq!(all_colors.len(), 11);
         assert!(all_colors.iter().any(|(name, _)| *name == "background"));
         assert!(all_colors.iter().any(|(name, _)| *name == "text"));

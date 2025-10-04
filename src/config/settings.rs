@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::error::{ConfigError, ConfigResult};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
@@ -70,7 +70,10 @@ mod tests {
 
         let result = settings.validate();
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), ConfigError::InvalidTheme { .. }));
+        assert!(matches!(
+            result.unwrap_err(),
+            ConfigError::InvalidTheme { .. }
+        ));
     }
 
     #[test]
@@ -84,7 +87,10 @@ mod tests {
 
         let result = settings.validate();
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), ConfigError::InvalidValue { .. }));
+        assert!(matches!(
+            result.unwrap_err(),
+            ConfigError::InvalidValue { .. }
+        ));
     }
 
     #[test]

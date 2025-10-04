@@ -1,8 +1,8 @@
 use std::fs;
 
-use std::path::{Path, PathBuf};
 use crate::config::MarkConfig;
 use crate::error::{ConfigError, ConfigResult, MarkError, Result};
+use std::path::{Path, PathBuf};
 
 #[cfg(not(test))]
 const GITHUB_REPO: &str = "Pazl27/mark";
@@ -52,8 +52,8 @@ impl ConfigLoader {
 
     /// Try to load and parse existing config file
     fn try_load_config(&self) -> ConfigResult<MarkConfig> {
-        let content = fs::read_to_string(&self.config_path)
-            .map_err(|_| ConfigError::FileNotFound {
+        let content =
+            fs::read_to_string(&self.config_path).map_err(|_| ConfigError::FileNotFound {
                 path: self.config_path.clone(),
             })?;
 
@@ -71,7 +71,10 @@ impl ConfigLoader {
 
         #[cfg(not(test))]
         {
-            eprintln!("Configuration file not found: {}", self.config_path.display());
+            eprintln!(
+                "Configuration file not found: {}",
+                self.config_path.display()
+            );
             eprintln!();
             eprintln!("Would you like to download the default configuration? [Y/n]");
 
@@ -80,7 +83,10 @@ impl ConfigLoader {
                 self.load_config()?;
             } else {
                 eprintln!();
-                eprintln!("Please create a configuration file at: {}", self.config_path.display());
+                eprintln!(
+                    "Please create a configuration file at: {}",
+                    self.config_path.display()
+                );
                 eprintln!("Documentation: {}", DOCUMENTATION_URL);
                 std::process::exit(1);
             }
@@ -100,19 +106,36 @@ impl ConfigLoader {
         {
             match _error {
                 ConfigError::TomlParseError { message, line, col } => {
-                    eprintln!("Configuration parse error at line {}, column {}: {}", line, col, message);
+                    eprintln!(
+                        "Configuration parse error at line {}, column {}: {}",
+                        line, col, message
+                    );
                 }
                 ConfigError::MissingField { field, section } => {
-                    eprintln!("Missing required field '{}' in section [{}]", field, section);
+                    eprintln!(
+                        "Missing required field '{}' in section [{}]",
+                        field, section
+                    );
                 }
                 ConfigError::MissingSection { section } => {
                     eprintln!("Missing required section [{}]", section);
                 }
-                ConfigError::InvalidValue { field, section, value, expected } => {
-                    eprintln!("Invalid value '{}' for field '{}' in section [{}]. Expected: {}", value, field, section, expected);
+                ConfigError::InvalidValue {
+                    field,
+                    section,
+                    value,
+                    expected,
+                } => {
+                    eprintln!(
+                        "Invalid value '{}' for field '{}' in section [{}]. Expected: {}",
+                        value, field, section, expected
+                    );
                 }
                 ConfigError::InvalidColor { color, field } => {
-                    eprintln!("Invalid color '{}' for field '{}'. Expected hex format like '#ffffff'", color, field);
+                    eprintln!(
+                        "Invalid color '{}' for field '{}'. Expected hex format like '#ffffff'",
+                        color, field
+                    );
                 }
                 ConfigError::InvalidTheme { theme } => {
                     eprintln!("Invalid theme '{}'. Must be 'dark' or 'light'", theme);
@@ -148,8 +171,10 @@ impl ConfigLoader {
     /// Download default configuration from GitHub
     #[cfg(not(test))]
     fn download_default_config(&self) -> Result<()> {
-        let url = format!("{}/{}/main/{}",
-            GITHUB_RAW_URL, GITHUB_REPO, CONFIG_FILE_PATH);
+        let url = format!(
+            "{}/{}/main/{}",
+            GITHUB_RAW_URL, GITHUB_REPO, CONFIG_FILE_PATH
+        );
 
         eprintln!("Downloading default configuration...");
 
@@ -158,10 +183,14 @@ impl ConfigLoader {
             .map_err(|e| MarkError::network(format!("Failed to download config: {}", e)))?;
 
         if !response.status().is_success() {
-            return Err(MarkError::network(format!("HTTP {}: Failed to download config", response.status())));
+            return Err(MarkError::network(format!(
+                "HTTP {}: Failed to download config",
+                response.status()
+            )));
         }
 
-        let content = response.text()
+        let content = response
+            .text()
             .map_err(|e| MarkError::network(format!("Failed to read response: {}", e)))?;
 
         // Create parent directory if it doesn't exist
@@ -172,11 +201,13 @@ impl ConfigLoader {
         }
 
         // Write config file
-        fs::write(&self.config_path, content).map_err(|e| {
-            MarkError::network(format!("Failed to write config file: {}", e))
-        })?;
+        fs::write(&self.config_path, content)
+            .map_err(|e| MarkError::network(format!("Failed to write config file: {}", e)))?;
 
-        eprintln!("Configuration downloaded to: {}", self.config_path.display());
+        eprintln!(
+            "Configuration downloaded to: {}",
+            self.config_path.display()
+        );
 
         Ok(())
     }
@@ -206,8 +237,8 @@ pub fn get_default_config_path() -> Result<PathBuf> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::TempDir;
     use std::fs;
+    use tempfile::TempDir;
 
     #[test]
     fn test_config_path_generation() {

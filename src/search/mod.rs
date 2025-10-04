@@ -3,11 +3,11 @@ pub mod markdown;
 #[cfg(test)]
 mod tests;
 
-use std::path::PathBuf;
 use std::env;
+use std::path::PathBuf;
 
-use walkdir::WalkDir;
 use crate::error::Result;
+use walkdir::WalkDir;
 
 pub use crate::search::markdown::MarkdownFile;
 
@@ -30,12 +30,14 @@ fn convert_to_files(paths: Vec<PathBuf>) -> Vec<MarkdownFile> {
 /// Expand tilde (~) to home directory path
 pub fn expand_tilde(path: &str) -> Result<PathBuf> {
     if path.starts_with("~/") {
-        let home = env::var("HOME")
-            .map_err(|_| crate::error::MarkError::search("Could not find HOME environment variable"))?;
+        let home = env::var("HOME").map_err(|_| {
+            crate::error::MarkError::search("Could not find HOME environment variable")
+        })?;
         Ok(PathBuf::from(home).join(&path[2..]))
     } else if path == "~" {
-        let home = env::var("HOME")
-            .map_err(|_| crate::error::MarkError::search("Could not find HOME environment variable"))?;
+        let home = env::var("HOME").map_err(|_| {
+            crate::error::MarkError::search("Could not find HOME environment variable")
+        })?;
         Ok(PathBuf::from(home))
     } else {
         Ok(PathBuf::from(path))

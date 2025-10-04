@@ -1,7 +1,6 @@
-use serde::{Deserialize, Serialize};
-use crate::config::{Settings, ColorTheme};
+use crate::config::{ColorTheme, Settings};
 use crate::error::{ConfigError, ConfigResult};
-
+use serde::{Deserialize, Serialize};
 
 /// Complete Mark configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -17,26 +16,25 @@ impl MarkConfig {
     /// Parse configuration from TOML string with strict validation
     pub fn from_toml(content: &str) -> ConfigResult<Self> {
         // First parse as a generic value to check structure
-        let value: toml::Value = toml::from_str(content)
-            .map_err(|e| {
-                let (line, col) = if let Some(span) = e.span() {
-                    (span.start, span.end)
-                } else {
-                    (0, 0)
-                };
-                ConfigError::TomlParseError {
-                    message: e.message().to_string(),
-                    line,
-                    col,
-                }
-            })?;
+        let value: toml::Value = toml::from_str(content).map_err(|e| {
+            let (line, col) = if let Some(span) = e.span() {
+                (span.start, span.end)
+            } else {
+                (0, 0)
+            };
+            ConfigError::TomlParseError {
+                message: e.message().to_string(),
+                line,
+                col,
+            }
+        })?;
 
         // Validate structure before deserializing
         Self::validate_structure(&value)?;
 
         // Now deserialize with validation
-        let config: MarkConfig = toml::from_str(content)
-            .map_err(|e| ConfigError::TomlParseError {
+        let config: MarkConfig =
+            toml::from_str(content).map_err(|e| ConfigError::TomlParseError {
                 message: e.message().to_string(),
                 line: 0,
                 col: 0,
@@ -55,7 +53,8 @@ impl MarkConfig {
 
     /// Validate the entire configuration structure
     fn validate_structure(value: &toml::Value) -> ConfigResult<()> {
-        let table = value.as_table()
+        let table = value
+            .as_table()
             .ok_or_else(|| ConfigError::missing_section("root"))?;
 
         // Check required sections
@@ -68,12 +67,14 @@ impl MarkConfig {
         }
 
         // Validate settings section
-        let settings = table["settings"].as_table()
+        let settings = table["settings"]
+            .as_table()
             .ok_or_else(|| ConfigError::missing_section("settings"))?;
         Self::validate_settings_section(settings)?;
 
         // Validate color section
-        let color = table["color"].as_table()
+        let color = table["color"]
+            .as_table()
             .ok_or_else(|| ConfigError::missing_section("color"))?;
         Self::validate_color_section(color)?;
 
@@ -146,12 +147,14 @@ impl MarkConfig {
         }
 
         // Validate dark colors
-        let dark = color["dark"].as_table()
+        let dark = color["dark"]
+            .as_table()
             .ok_or_else(|| ConfigError::missing_section("color.dark"))?;
         Self::validate_color_fields(dark, "color.dark")?;
 
         // Validate light colors
-        let light = color["light"].as_table()
+        let light = color["light"]
+            .as_table()
             .ok_or_else(|| ConfigError::missing_section("color.light"))?;
         Self::validate_color_fields(light, "color.light")?;
 
@@ -161,7 +164,17 @@ impl MarkConfig {
     /// Validate color fields in a theme
     fn validate_color_fields(colors: &toml::value::Table, section: &str) -> ConfigResult<()> {
         let required_color_fields = vec![
-            "background", "text", "code_block", "h1", "h2", "h3", "h4", "h5", "h6", "link", "passive"
+            "background",
+            "text",
+            "code_block",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "link",
+            "passive",
         ];
 
         for field in required_color_fields {
@@ -169,13 +182,14 @@ impl MarkConfig {
                 return Err(ConfigError::missing_field(field, section));
             }
 
-            let color_value = colors[field].as_str()
-                .ok_or_else(|| ConfigError::invalid_value(
+            let color_value = colors[field].as_str().ok_or_else(|| {
+                ConfigError::invalid_value(
                     field,
                     section,
                     &colors[field].to_string(),
                     "string (hex color)",
-                ))?;
+                )
+            })?;
 
             Self::validate_hex_color(color_value, field)?;
         }
@@ -272,7 +286,9 @@ mod tests {
 
         let errors = MarkConfig::validate_and_collect_errors(incomplete_config);
         assert!(!errors.is_empty());
-        assert!(errors.iter().any(|e| matches!(e, ConfigError::MissingSection { section } if section == "color")));
+        assert!(errors
+            .iter()
+            .any(|e| matches!(e, ConfigError::MissingSection { section } if section == "color")));
     }
 
     #[test]
@@ -313,7 +329,10 @@ mod tests {
 
         let result = MarkConfig::from_toml(invalid_config);
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), ConfigError::InvalidTheme { .. }));
+        assert!(matches!(
+            result.unwrap_err(),
+            ConfigError::InvalidTheme { .. }
+        ));
     }
 
     #[test]
@@ -354,7 +373,10 @@ mod tests {
 
         let result = MarkConfig::from_toml(invalid_config);
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), ConfigError::InvalidColor { .. }));
+        assert!(matches!(
+            result.unwrap_err(),
+            ConfigError::InvalidColor { .. }
+        ));
     }
 
     #[test]
