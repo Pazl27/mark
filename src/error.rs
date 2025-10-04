@@ -24,6 +24,9 @@ pub enum MarkError {
 
     #[error("Network error: {message}")]
     Network { message: String },
+
+    #[error("Search error: {message}")]
+    Search { message: String },
 }
 
 /// Configuration-specific error types
@@ -86,6 +89,13 @@ impl MarkError {
         }
     }
 
+    /// Create a new search error
+    pub fn search<S: Into<String>>(message: S) -> Self {
+        Self::Search {
+            message: message.into(),
+        }
+    }
+
     /// Get the exit code for this error
     pub fn exit_code(&self) -> i32 {
         match self {
@@ -93,6 +103,7 @@ impl MarkError {
             Self::InvalidFileFormat { .. } | Self::InvalidWidth { .. } => 22,
             Self::Config { .. } | Self::ConfigError(_) => 78,
             Self::Network { .. } => 7,
+            Self::Search { .. } => 3,
             Self::Io(_) => 1,
         }
     }
@@ -192,5 +203,8 @@ mod tests {
 
         let network_error = MarkError::network("Connection failed");
         assert_eq!(network_error.exit_code(), 7);
+
+        let search_error = MarkError::search("Invalid search pattern");
+        assert_eq!(search_error.exit_code(), 3);
     }
 }
