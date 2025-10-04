@@ -1,0 +1,39 @@
+# Clippy configuration for Mark project
+
+# Minimum supported Rust version
+msrv = "1.70"
+
+# Complexity thresholds
+cognitive-complexity-threshold = 30
+type-complexity-threshold = 250
+too-many-arguments-threshold = 7
+trivial-copy-size-limit = 128
+pass-by-value-size-limit = 256
+vec-box-size-threshold = 4096
+max-trait-bounds = 3
+max-struct-bools = 3
+max-fn-params-bools = 3
+
+# Avoid breaking code
+avoid-breaking-exported-api = false
+
+# Check for standard library items
+check-private-items = false
+
+# Disallowed methods (methods we don't want to use)
+disallowed-methods = [
+    "std::process::exit",  # Use proper error handling instead
+]
+
+# Disallowed types (types we want to avoid)
+disallowed-types = [
+    "std::collections::LinkedList",  # Prefer Vec or VecDeque
+]
+
+# Documentation
+doc-valid-idents = ["CLI", "TUI", "API", "URL", "HTTP", "JSON", "TOML", "MD"]
+
+# Allow certain lints that might be too strict for this project
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
