@@ -1,9 +1,9 @@
-mod error;
 mod cli;
+mod error;
 
 use error::{CliError, Result};
-use std::process;
 use std::error::Error;
+use std::process;
 
 #[tokio::main]
 async fn main() {
