@@ -24,3 +24,6 @@ enable = true
 [preprocessor.links]
 
 [preprocessor.index]
+
+# Include preprocessor for referencing external files
+[preprocessor.includes]
