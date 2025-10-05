@@ -6,11 +6,8 @@ on:
     branches: [ main ]
     paths:
       - 'docs/**'
-      - 'README.md'
-      - 'LICENSE'
-      - 'CHANGELOG.md'
       - '.github/workflows/deploy-docs.yml'
-  
+
   # Allow manual triggering
   workflow_dispatch:
 
@@ -36,18 +33,18 @@ jobs:
         with:
           # Fetch full history to ensure symbolic links work properly
           fetch-depth: 0
-      
+
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      
+
       - name: Install mdBook
         run: |
           cargo install mdbook --version ^0.4
           mdbook --version
-      
+
       - name: Verify symbolic links
         run: |
           echo "Checking symbolic links in docs/src/"
@@ -61,7 +58,7 @@ jobs:
           else
             echo "No LICENSE.md symlink found"
           fi
-      
+
       - name: Copy LICENSE to docs if symlink fails
         run: |
           # Backup solution: copy LICENSE if symlink doesn't work in CI
@@ -69,19 +66,19 @@ jobs:
             echo "Symlink not working in CI, copying LICENSE file"
             cp LICENSE docs/src/LICENSE.md
           fi
-      
+
       - name: Build documentation
         run: |
           cd docs
           mdbook build
           echo "Build completed, checking output:"
           ls -la book/
-      
+
       - name: Setup Pages
-        uses: actions/configure-pages@v3
-      
+        uses: actions/configure-pages@v4
+
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v4
         with:
           path: './docs/book'
 
@@ -95,7 +92,7 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
 
   # Optional: Notify on deployment
   notify:
@@ -106,9 +103,9 @@ jobs:
       - name: Deployment Status
         run: |
           if [ "${{ needs.deploy.result }}" == "success" ]; then
-            echo "✅ Documentation deployed successfully!"
-            echo "📖 Visit: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+            echo "Documentation deployed successfully!"
+            echo "Visit: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
           else
-            echo "❌ Documentation deployment failed"
+            echo "Documentation deployment failed"
             echo "Check the logs above for details"
           fi
