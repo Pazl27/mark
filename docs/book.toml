@@ -1,0 +1,26 @@
+[book]
+title = "Mark - Markdown Viewer"
+authors = ["Pazl27"]
+description = "A terminal-based markdown viewer and renderer written in Rust"
+src = "src"
+language = "en"
+
+[build]
+build-dir = "book"
+
+[output.html]
+default-theme = "light"
+preferred-dark-theme = "navy"
+smart-punctuation = true
+git-repository-url = "https://github.com/Pazl27/mark"
+edit-url-template = "https://github.com/Pazl27/mark/edit/main/docs/src/{path}"
+
+[output.html.search]
+enable = true
+
+[output.html.print]
+enable = true
+
+[preprocessor.links]
+
+[preprocessor.index]
