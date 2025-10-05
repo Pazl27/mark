@@ -8,7 +8,9 @@ use crate::error::ParseError;
 use crate::markdown_parser::lexer::tokenize;
 
 /// Parse tokens into an AST
-pub fn parse_tokens(tokens: Vec<crate::markdown_parser::lexer::Token>) -> Result<AstNode, ParseError> {
+pub fn parse_tokens(
+    tokens: Vec<crate::markdown_parser::lexer::Token>,
+) -> Result<AstNode, ParseError> {
     let mut parser = Parser::new(tokens);
     parser.parse()
 }
@@ -32,12 +34,14 @@ mod tests {
     fn test_parse_simple_markdown() {
         let markdown = "# Hello\n\nThis is a paragraph.";
         let ast = parse_markdown(markdown).unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             assert!(children.len() >= 2);
             assert!(matches!(children[0], AstNode::Heading { level: 1, .. }));
             // Look for paragraph anywhere in children (accounting for whitespace nodes)
-            let has_paragraph = children.iter().any(|child| matches!(child, AstNode::Paragraph { .. }));
+            let has_paragraph = children
+                .iter()
+                .any(|child| matches!(child, AstNode::Paragraph { .. }));
             assert!(has_paragraph);
         }
     }
@@ -46,7 +50,7 @@ mod tests {
     fn test_parse_or_default() {
         let invalid_markdown = "";
         let ast = parse_markdown_or_default(invalid_markdown);
-        
+
         if let AstNode::Document { children } = ast {
             assert_eq!(children.len(), 0);
         }

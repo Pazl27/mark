@@ -85,7 +85,9 @@ pub enum ConfigError {
 /// Parser-specific error types
 #[derive(Error, Debug)]
 pub enum ParseError {
-    #[error("Unexpected token at line {line}, column {column}: expected {expected}, found {found}")]
+    #[error(
+        "Unexpected token at line {line}, column {column}: expected {expected}, found {found}"
+    )]
     UnexpectedToken {
         expected: String,
         found: String,
@@ -94,11 +96,11 @@ pub enum ParseError {
     },
 
     #[error("Unexpected end of input: expected {expected}")]
-    UnexpectedEndOfInput {
-        expected: String,
-    },
+    UnexpectedEndOfInput { expected: String },
 
-    #[error("Invalid heading level {level} at line {line}, column {column}: must be between 1 and 6")]
+    #[error(
+        "Invalid heading level {level} at line {line}, column {column}: must be between 1 and 6"
+    )]
     InvalidHeadingLevel {
         level: u8,
         line: usize,
@@ -144,14 +146,16 @@ pub enum ParseError {
 impl From<crate::error::LexerError> for ParseError {
     fn from(lexer_error: crate::error::LexerError) -> Self {
         match lexer_error {
-            crate::error::LexerError::UnexpectedCharacter { character, line, column } => {
-                ParseError::UnexpectedToken {
-                    expected: "valid markdown character".to_string(),
-                    found: character.to_string(),
-                    line,
-                    column,
-                }
-            }
+            crate::error::LexerError::UnexpectedCharacter {
+                character,
+                line,
+                column,
+            } => ParseError::UnexpectedToken {
+                expected: "valid markdown character".to_string(),
+                found: character.to_string(),
+                line,
+                column,
+            },
             crate::error::LexerError::UnterminatedCodeBlock { line, column } => {
                 ParseError::UnmatchedDelimiter {
                     delimiter: '`',
@@ -159,14 +163,16 @@ impl From<crate::error::LexerError> for ParseError {
                     column,
                 }
             }
-            crate::error::LexerError::InvalidSyntax { message, line, column } => {
-                ParseError::UnexpectedToken {
-                    expected: "valid markdown syntax".to_string(),
-                    found: message,
-                    line,
-                    column,
-                }
-            }
+            crate::error::LexerError::InvalidSyntax {
+                message,
+                line,
+                column,
+            } => ParseError::UnexpectedToken {
+                expected: "valid markdown syntax".to_string(),
+                found: message,
+                line,
+                column,
+            },
             crate::error::LexerError::InvalidUrl { url, line, column } => {
                 ParseError::MalformedLink {
                     message: format!("Invalid URL: {}", url),
@@ -174,14 +180,16 @@ impl From<crate::error::LexerError> for ParseError {
                     column,
                 }
             }
-            crate::error::LexerError::NumberTooLarge { value, line, column } => {
-                ParseError::UnexpectedToken {
-                    expected: "valid number".to_string(),
-                    found: value,
-                    line,
-                    column,
-                }
-            }
+            crate::error::LexerError::NumberTooLarge {
+                value,
+                line,
+                column,
+            } => ParseError::UnexpectedToken {
+                expected: "valid number".to_string(),
+                found: value,
+                line,
+                column,
+            },
         }
     }
 }
@@ -197,10 +205,7 @@ pub enum LexerError {
     },
 
     #[error("Unterminated code block starting at line {line}, column {column}")]
-    UnterminatedCodeBlock {
-        line: usize,
-        column: usize,
-    },
+    UnterminatedCodeBlock { line: usize, column: usize },
 
     #[error("Invalid markdown syntax at line {line}, column {column}: {message}")]
     InvalidSyntax {
@@ -324,7 +329,12 @@ impl ConfigError {
 
 impl ParseError {
     /// Create an unexpected token error
-    pub fn unexpected_token<S: Into<String>>(expected: S, found: S, line: usize, column: usize) -> Self {
+    pub fn unexpected_token<S: Into<String>>(
+        expected: S,
+        found: S,
+        line: usize,
+        column: usize,
+    ) -> Self {
         Self::UnexpectedToken {
             expected: expected.into(),
             found: found.into(),
@@ -342,7 +352,11 @@ impl ParseError {
 
     /// Create an invalid heading level error
     pub fn invalid_heading_level(level: u8, line: usize, column: usize) -> Self {
-        Self::InvalidHeadingLevel { level, line, column }
+        Self::InvalidHeadingLevel {
+            level,
+            line,
+            column,
+        }
     }
 
     /// Create a malformed link error
@@ -374,7 +388,11 @@ impl ParseError {
 
     /// Create an unmatched delimiter error
     pub fn unmatched_delimiter(delimiter: char, line: usize, column: usize) -> Self {
-        Self::UnmatchedDelimiter { delimiter, line, column }
+        Self::UnmatchedDelimiter {
+            delimiter,
+            line,
+            column,
+        }
     }
 
     /// Create an invalid table error
@@ -390,7 +408,11 @@ impl ParseError {
 impl LexerError {
     /// Create an unexpected character error
     pub fn unexpected_character(character: char, line: usize, column: usize) -> Self {
-        Self::UnexpectedCharacter { character, line, column }
+        Self::UnexpectedCharacter {
+            character,
+            line,
+            column,
+        }
     }
 
     /// Create an unterminated code block error
@@ -489,7 +511,9 @@ mod tests {
         assert!(unterminated.to_string().contains("column 10"));
 
         let invalid_syntax = LexerError::invalid_syntax("Missing closing bracket", 3, 15);
-        assert!(invalid_syntax.to_string().contains("Missing closing bracket"));
+        assert!(invalid_syntax
+            .to_string()
+            .contains("Missing closing bracket"));
         assert!(invalid_syntax.to_string().contains("line 3"));
     }
 
@@ -502,7 +526,9 @@ mod tests {
         assert!(unexpected_token.to_string().contains("column 5"));
 
         let unexpected_end = ParseError::unexpected_end_of_input("closing bracket");
-        assert!(unexpected_end.to_string().contains("expected closing bracket"));
+        assert!(unexpected_end
+            .to_string()
+            .contains("expected closing bracket"));
 
         let invalid_heading = ParseError::invalid_heading_level(7, 2, 10);
         assert!(invalid_heading.to_string().contains("level 7"));

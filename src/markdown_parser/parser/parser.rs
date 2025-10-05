@@ -11,8 +11,8 @@ pub struct Parser {
 
 impl Parser {
     pub fn new(tokens: Vec<Token>) -> Self {
-        Self { 
-            tokens, 
+        Self {
+            tokens,
             current: 0,
             line: 1,
             column: 1,
@@ -36,12 +36,8 @@ impl Parser {
         self.skip_whitespace();
 
         match self.current_token().cloned() {
-            Some(Token::Hash(level)) => {
-                Ok(Some(self.parse_heading(level)?))
-            }
-            Some(Token::Number(_)) => {
-                Ok(Some(self.parse_ordered_list()?))
-            }
+            Some(Token::Hash(level)) => Ok(Some(self.parse_heading(level)?)),
+            Some(Token::Number(_)) => Ok(Some(self.parse_ordered_list()?)),
             Some(Token::Hyphen) => {
                 if self.is_horizontal_rule() {
                     Ok(Some(self.parse_horizontal_rule()?))
@@ -49,32 +45,28 @@ impl Parser {
                     Ok(Some(self.parse_unordered_list()?))
                 }
             }
-            Some(Token::Plus) => {
-                Ok(Some(self.parse_unordered_list()?))
-            }
-            Some(Token::GreaterThan) => {
-                Ok(Some(self.parse_blockquote()?))
-            }
+            Some(Token::Plus) => Ok(Some(self.parse_unordered_list()?)),
+            Some(Token::GreaterThan) => Ok(Some(self.parse_blockquote()?)),
             Some(Token::Backtick(amount)) if amount >= 3 => {
                 Ok(Some(self.parse_code_block(amount)?))
             }
-            Some(Token::Pipe) => {
-                Ok(Some(self.parse_table()?))
-            }
+            Some(Token::Pipe) => Ok(Some(self.parse_table()?)),
             Some(Token::Newline) => {
                 self.advance();
                 Ok(None)
             }
-            Some(_) => {
-                Ok(Some(self.parse_paragraph()?))
-            }
+            Some(_) => Ok(Some(self.parse_paragraph()?)),
             None => Ok(None),
         }
     }
 
     fn parse_heading(&mut self, level: u8) -> Result<AstNode, ParseError> {
         if level > 6 {
-            return Err(ParseError::invalid_heading_level(level, self.line, self.column));
+            return Err(ParseError::invalid_heading_level(
+                level,
+                self.line,
+                self.column,
+            ));
         }
 
         self.advance(); // Consume the '#'
@@ -113,7 +105,7 @@ impl Parser {
 
         while let Some(Token::Number(_)) = self.current_token() {
             self.advance(); // Consume number
-            
+
             // Expect a dot
             if !matches!(self.current_token(), Some(Token::Dot)) {
                 return Err(ParseError::invalid_list(
@@ -134,13 +126,19 @@ impl Parser {
             }
         }
 
-        Ok(AstNode::List { ordered: true, items })
+        Ok(AstNode::List {
+            ordered: true,
+            items,
+        })
     }
 
     fn parse_unordered_list(&mut self) -> Result<AstNode, ParseError> {
         let mut items = Vec::new();
 
-        while matches!(self.current_token(), Some(Token::Hyphen) | Some(Token::Plus)) {
+        while matches!(
+            self.current_token(),
+            Some(Token::Hyphen) | Some(Token::Plus)
+        ) {
             self.advance(); // Consume list marker
             self.skip_whitespace();
 
@@ -153,7 +151,10 @@ impl Parser {
             }
         }
 
-        Ok(AstNode::List { ordered: false, items })
+        Ok(AstNode::List {
+            ordered: false,
+            items,
+        })
     }
 
     fn parse_blockquote(&mut self) -> Result<AstNode, ParseError> {
@@ -177,7 +178,7 @@ impl Parser {
 
     fn parse_code_block(&mut self, _fence_length: u8) -> Result<AstNode, ParseError> {
         self.advance(); // Consume opening backticks
-        
+
         // Parse optional language
         let mut language = None;
         if let Some(Token::Text(lang)) = self.current_token() {
@@ -186,7 +187,10 @@ impl Parser {
         }
 
         // Skip to end of line
-        while !matches!(self.current_token(), Some(Token::Newline) | Some(Token::Eof)) {
+        while !matches!(
+            self.current_token(),
+            Some(Token::Newline) | Some(Token::Eof)
+        ) {
             self.advance();
         }
         self.advance(); // Consume newline
@@ -246,15 +250,20 @@ impl Parser {
         // Parse header row
         if matches!(self.current_token(), Some(Token::Pipe)) {
             self.advance(); // Skip initial pipe
-            
-            while !matches!(self.current_token(), Some(Token::Newline) | Some(Token::Eof)) {
+
+            while !matches!(
+                self.current_token(),
+                Some(Token::Newline) | Some(Token::Eof)
+            ) {
                 if matches!(self.current_token(), Some(Token::Pipe)) {
                     self.advance();
                     continue;
                 }
-                
+
                 let cell_content = self.parse_table_cell_content()?;
-                headers.push(AstNode::TableCell { content: cell_content });
+                headers.push(AstNode::TableCell {
+                    content: cell_content,
+                });
             }
         }
 
@@ -264,7 +273,10 @@ impl Parser {
         }
 
         // Parse separator row (skip for now)
-        while !matches!(self.current_token(), Some(Token::Newline) | Some(Token::Eof)) {
+        while !matches!(
+            self.current_token(),
+            Some(Token::Newline) | Some(Token::Eof)
+        ) {
             self.advance();
         }
         if matches!(self.current_token(), Some(Token::Newline)) {
@@ -275,19 +287,24 @@ impl Parser {
         while matches!(self.current_token(), Some(Token::Pipe)) {
             let mut row_cells = Vec::new();
             self.advance(); // Skip initial pipe
-            
-            while !matches!(self.current_token(), Some(Token::Newline) | Some(Token::Eof)) {
+
+            while !matches!(
+                self.current_token(),
+                Some(Token::Newline) | Some(Token::Eof)
+            ) {
                 if matches!(self.current_token(), Some(Token::Pipe)) {
                     self.advance();
                     continue;
                 }
-                
+
                 let cell_content = self.parse_table_cell_content()?;
-                row_cells.push(AstNode::TableCell { content: cell_content });
+                row_cells.push(AstNode::TableCell {
+                    content: cell_content,
+                });
             }
-            
+
             rows.push(row_cells);
-            
+
             if matches!(self.current_token(), Some(Token::Newline)) {
                 self.advance();
             }
@@ -298,8 +315,11 @@ impl Parser {
 
     fn parse_table_cell_content(&mut self) -> Result<Vec<AstNode>, ParseError> {
         let mut content = Vec::new();
-        
-        while !matches!(self.current_token(), Some(Token::Pipe) | Some(Token::Newline) | Some(Token::Eof)) {
+
+        while !matches!(
+            self.current_token(),
+            Some(Token::Pipe) | Some(Token::Newline) | Some(Token::Eof)
+        ) {
             match self.current_token() {
                 Some(Token::Text(text)) => {
                     content.push(AstNode::Text(text.clone()));
@@ -319,7 +339,7 @@ impl Parser {
                 }
             }
         }
-        
+
         Ok(content)
     }
 
@@ -697,8 +717,7 @@ impl Parser {
     }
 
     fn is_at_end(&self) -> bool {
-        self.current >= self.tokens.len() ||
-        matches!(self.current_token(), Some(Token::Eof))
+        self.current >= self.tokens.len() || matches!(self.current_token(), Some(Token::Eof))
     }
 
     fn skip_whitespace(&mut self) {
@@ -711,30 +730,34 @@ impl Parser {
         // Check if we have at least 3 consecutive hyphens
         let mut count = 0;
         let mut pos = self.current;
-        
+
         while let Some(Token::Hyphen) = self.tokens.get(pos) {
             count += 1;
             pos += 1;
         }
-        
+
         count >= 3
     }
 
     fn peek_next_is_block_start(&self) -> bool {
         // Look ahead to see if the next non-whitespace token starts a block
         let mut pos = self.current + 1;
-        
+
         // Skip whitespace and newlines
         while let Some(token) = self.tokens.get(pos) {
             match token {
                 Token::Whitespace | Token::Newline => pos += 1,
-                Token::Hash(_) | Token::Number(_) | Token::Hyphen | 
-                Token::Plus | Token::GreaterThan | Token::Pipe => return true,
+                Token::Hash(_)
+                | Token::Number(_)
+                | Token::Hyphen
+                | Token::Plus
+                | Token::GreaterThan
+                | Token::Pipe => return true,
                 Token::Backtick(count) if *count >= 3 => return true,
                 _ => return false,
             }
         }
-        
+
         false
     }
 }
@@ -754,10 +777,7 @@ mod tests {
     }
 
     fn paragraph_tokens(text: &str) -> Vec<Token> {
-        vec![
-            Token::Text(text.to_string()),
-            Token::Eof,
-        ]
+        vec![Token::Text(text.to_string()), Token::Eof]
     }
 
     fn emphasis_tokens(marker: Token, text: &str, closing_marker: Token) -> Vec<Token> {
@@ -774,7 +794,7 @@ mod tests {
         let tokens = heading_tokens(1, "Main Title");
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             assert_eq!(children.len(), 1);
             if let AstNode::Heading { level, content } = &children[0] {
@@ -791,7 +811,7 @@ mod tests {
         let tokens = heading_tokens(6, "Small Title");
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             assert_eq!(children.len(), 1);
             if let AstNode::Heading { level, .. } = &children[0] {
@@ -802,10 +822,14 @@ mod tests {
 
     #[test]
     fn test_parse_invalid_heading_level() {
-        let tokens = vec![Token::Hash(7), Token::Text("Invalid".to_string()), Token::Eof];
+        let tokens = vec![
+            Token::Hash(7),
+            Token::Text("Invalid".to_string()),
+            Token::Eof,
+        ];
         let mut parser = Parser::new(tokens);
         let result = parser.parse();
-        
+
         assert!(result.is_err());
         if let Err(ParseError::InvalidHeadingLevel { level, .. }) = result {
             assert_eq!(level, 7);
@@ -819,7 +843,7 @@ mod tests {
         let tokens = paragraph_tokens("Simple paragraph text");
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             assert_eq!(children.len(), 1);
             if let AstNode::Paragraph { content } = &children[0] {
@@ -833,14 +857,10 @@ mod tests {
 
     #[test]
     fn test_parse_italic_emphasis() {
-        let tokens = emphasis_tokens(
-            Token::Asterisk(1), 
-            "italic", 
-            Token::Asterisk(1)
-        );
+        let tokens = emphasis_tokens(Token::Asterisk(1), "italic", Token::Asterisk(1));
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::Paragraph { content } = &children[0] {
                 if let AstNode::Italic(italic_content) = &content[0] {
@@ -856,14 +876,10 @@ mod tests {
 
     #[test]
     fn test_parse_bold_emphasis() {
-        let tokens = emphasis_tokens(
-            Token::Asterisk(2), 
-            "bold", 
-            Token::Asterisk(2)
-        );
+        let tokens = emphasis_tokens(Token::Asterisk(2), "bold", Token::Asterisk(2));
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::Paragraph { content } = &children[0] {
                 if let AstNode::Bold(bold_content) = &content[0] {
@@ -879,14 +895,10 @@ mod tests {
 
     #[test]
     fn test_parse_underscore_emphasis() {
-        let tokens = emphasis_tokens(
-            Token::Underscore(1), 
-            "italic", 
-            Token::Underscore(1)
-        );
+        let tokens = emphasis_tokens(Token::Underscore(1), "italic", Token::Underscore(1));
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::Paragraph { content } = &children[0] {
                 if let AstNode::Italic(italic_content) = &content[0] {
@@ -910,7 +922,7 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::Paragraph { content } = &children[0] {
                 if let AstNode::Strikethrough(strike_content) = &content[0] {
@@ -934,7 +946,7 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::Paragraph { content } = &children[0] {
                 if let AstNode::InlineCode(code) = &content[0] {
@@ -956,9 +968,12 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let result = parser.parse();
-        
+
         assert!(result.is_err());
-        assert!(matches!(result, Err(ParseError::UnmatchedDelimiter { delimiter: '*', .. })));
+        assert!(matches!(
+            result,
+            Err(ParseError::UnmatchedDelimiter { delimiter: '*', .. })
+        ));
     }
 
     #[test]
@@ -977,12 +992,12 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::List { ordered, items } = &children[0] {
                 assert!(*ordered);
                 assert_eq!(items.len(), 2);
-                
+
                 if let AstNode::ListItem { content } = &items[0] {
                     if let AstNode::Text(text) = &content[0] {
                         assert_eq!(text, "First item");
@@ -1008,7 +1023,7 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::List { ordered, items } = &children[0] {
                 assert!(!*ordered);
@@ -1033,7 +1048,7 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::BlockQuote { content } = &children[0] {
                 assert!(content.len() >= 2);
@@ -1056,7 +1071,7 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::CodeBlock { language, code } = &children[0] {
                 assert_eq!(language.as_ref().unwrap(), "rust");
@@ -1069,15 +1084,10 @@ mod tests {
 
     #[test]
     fn test_parse_horizontal_rule() {
-        let tokens = vec![
-            Token::Hyphen,
-            Token::Hyphen,
-            Token::Hyphen,
-            Token::Eof,
-        ];
+        let tokens = vec![Token::Hyphen, Token::Hyphen, Token::Hyphen, Token::Eof];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::HorizontalRule = &children[0] {
                 // Success
@@ -1100,7 +1110,7 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::Paragraph { content } = &children[0] {
                 if let AstNode::Link { text, url } = &content[0] {
@@ -1125,7 +1135,7 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let result = parser.parse();
-        
+
         assert!(result.is_err());
         assert!(matches!(result, Err(ParseError::MalformedLink { .. })));
     }
@@ -1135,7 +1145,7 @@ mod tests {
         let tokens = vec![Token::Eof];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             assert_eq!(children.len(), 0);
         }
@@ -1157,15 +1167,15 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             assert!(children.len() >= 2);
             assert!(matches!(children[0], AstNode::Heading { .. }));
-            
+
             // Find paragraph (might not be at index 1 due to whitespace handling)
-            let has_paragraph = children.iter().any(|child| {
-                matches!(child, AstNode::Paragraph { .. })
-            });
+            let has_paragraph = children
+                .iter()
+                .any(|child| matches!(child, AstNode::Paragraph { .. }));
             assert!(has_paragraph);
         }
     }
@@ -1183,7 +1193,7 @@ mod tests {
         ];
         let mut parser = Parser::new(tokens);
         let ast = parser.parse().unwrap();
-        
+
         if let AstNode::Document { children } = ast {
             if let AstNode::Paragraph { content } = &children[0] {
                 if let AstNode::Bold(bold_content) = &content[0] {

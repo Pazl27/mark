@@ -1,7 +1,7 @@
 use std::{iter::Peekable, str::Chars};
 
-use crate::markdown_parser::lexer::tokens::Token;
 use crate::error::LexerError;
+use crate::markdown_parser::lexer::tokens::Token;
 
 pub struct Lexer<'a> {
     input: Peekable<Chars<'a>>,
@@ -165,7 +165,11 @@ impl<'a> Lexer<'a> {
 
         match number_str.parse::<u32>() {
             Ok(number) => Ok(Token::Number(number)),
-            Err(_) => Err(LexerError::number_too_large(number_str, start_line, start_column)),
+            Err(_) => Err(LexerError::number_too_large(
+                number_str,
+                start_line,
+                start_column,
+            )),
         }
     }
 
@@ -187,8 +191,8 @@ impl<'a> Lexer<'a> {
         while let Some(&ch) = self.peek_char() {
             match ch {
                 // Stop at markdown special characters
-                '\n' | '\r' | ' ' | '\t' | '#' | '*' | '`' | '_' | '~' | '[' | ']'
-                | '(' | ')' | '!' | '>' | '-' | '|' | '+' => break,
+                '\n' | '\r' | ' ' | '\t' | '#' | '*' | '`' | '_' | '~' | '[' | ']' | '(' | ')'
+                | '!' | '>' | '-' | '|' | '+' => break,
                 _ => {
                     text.push(ch);
                     self.advance();
@@ -197,8 +201,11 @@ impl<'a> Lexer<'a> {
         }
 
         // Check if this looks like a URL
-        if text.starts_with("http://") || text.starts_with("https://") ||
-           text.starts_with("ftp://") || text.starts_with("mailto:") {
+        if text.starts_with("http://")
+            || text.starts_with("https://")
+            || text.starts_with("ftp://")
+            || text.starts_with("mailto:")
+        {
             Ok(Token::Url(text))
         } else {
             Ok(Token::Text(text))
@@ -217,8 +224,6 @@ impl<'a> Lexer<'a> {
         Token::Whitespace
     }
 
-
-
     fn peek_char(&mut self) -> Option<&char> {
         self.input.peek()
     }
@@ -236,7 +241,7 @@ impl<'a> Lexer<'a> {
                 self.current_pos += 1;
                 Some(ch)
             }
-            None => None
+            None => None,
         }
     }
 }
@@ -357,9 +362,16 @@ mod tests {
         let tokens = lexer.tokenize().unwrap();
 
         // Find the newlines in the token stream
-        let newline_positions: Vec<usize> = tokens.iter()
+        let newline_positions: Vec<usize> = tokens
+            .iter()
             .enumerate()
-            .filter_map(|(i, token)| if matches!(token, Token::Newline) { Some(i) } else { None })
+            .filter_map(|(i, token)| {
+                if matches!(token, Token::Newline) {
+                    Some(i)
+                } else {
+                    None
+                }
+            })
             .collect();
 
         assert_eq!(newline_positions.len(), 2);
@@ -430,7 +442,10 @@ mod tests {
         let mut lexer = Lexer::new("\n\n\r\n\n");
         let tokens = lexer.tokenize().unwrap();
 
-        let newline_count = tokens.iter().filter(|t| matches!(t, Token::Newline)).count();
+        let newline_count = tokens
+            .iter()
+            .filter(|t| matches!(t, Token::Newline))
+            .count();
         assert_eq!(newline_count, 4);
     }
 
@@ -553,7 +568,10 @@ mod tests {
         let mut lexer = Lexer::new("line1\nline2\r\nline3\rline4");
         let tokens = lexer.tokenize().unwrap();
 
-        let newline_count = tokens.iter().filter(|t| matches!(t, Token::Newline)).count();
+        let newline_count = tokens
+            .iter()
+            .filter(|t| matches!(t, Token::Newline))
+            .count();
         assert_eq!(newline_count, 3);
     }
 
@@ -688,8 +706,15 @@ mod tests {
         let tokens = lexer.tokenize().unwrap();
 
         // Check for proper asterisk grouping
-        let asterisk_tokens: Vec<_> = tokens.iter()
-            .filter_map(|t| if let Token::Asterisk(count) = t { Some(*count) } else { None })
+        let asterisk_tokens: Vec<_> = tokens
+            .iter()
+            .filter_map(|t| {
+                if let Token::Asterisk(count) = t {
+                    Some(*count)
+                } else {
+                    None
+                }
+            })
             .collect();
 
         assert!(asterisk_tokens.contains(&1));
@@ -702,7 +727,10 @@ mod tests {
         let mut lexer = Lexer::new("> quote\n>> nested\n> > spaced");
         let tokens = lexer.tokenize().unwrap();
 
-        let gt_count = tokens.iter().filter(|t| matches!(t, Token::GreaterThan)).count();
+        let gt_count = tokens
+            .iter()
+            .filter(|t| matches!(t, Token::GreaterThan))
+            .count();
         assert!(gt_count >= 4);
     }
 
@@ -711,8 +739,15 @@ mod tests {
         let mut lexer = Lexer::new("`inline` ``empty`` ```\nblock\n``` ````four````");
         let tokens = lexer.tokenize().unwrap();
 
-        let backtick_tokens: Vec<_> = tokens.iter()
-            .filter_map(|t| if let Token::Backtick(count) = t { Some(*count) } else { None })
+        let backtick_tokens: Vec<_> = tokens
+            .iter()
+            .filter_map(|t| {
+                if let Token::Backtick(count) = t {
+                    Some(*count)
+                } else {
+                    None
+                }
+            })
             .collect();
 
         assert!(backtick_tokens.contains(&1));
@@ -755,7 +790,10 @@ mod tests {
 
         // Should handle repeated punctuation
         let dot_count = tokens.iter().filter(|t| matches!(t, Token::Dot)).count();
-        let excl_count = tokens.iter().filter(|t| matches!(t, Token::Exclamation)).count();
+        let excl_count = tokens
+            .iter()
+            .filter(|t| matches!(t, Token::Exclamation))
+            .count();
         let hyphen_count = tokens.iter().filter(|t| matches!(t, Token::Hyphen)).count();
         let plus_count = tokens.iter().filter(|t| matches!(t, Token::Plus)).count();
         let pipe_count = tokens.iter().filter(|t| matches!(t, Token::Pipe)).count();
@@ -898,7 +936,10 @@ let code = "block";
         let mut lexer = Lexer::new(&input);
         let tokens = lexer.tokenize().unwrap();
 
-        let newline_count = tokens.iter().filter(|t| matches!(t, Token::Newline)).count();
+        let newline_count = tokens
+            .iter()
+            .filter(|t| matches!(t, Token::Newline))
+            .count();
         assert_eq!(newline_count, 1000);
     }
 
@@ -920,8 +961,14 @@ let code = "block";
         let mut lexer = Lexer::new("***___***___***");
         let tokens = lexer.tokenize().unwrap();
 
-        let asterisk_count = tokens.iter().filter(|t| matches!(t, Token::Asterisk(_))).count();
-        let underscore_count = tokens.iter().filter(|t| matches!(t, Token::Underscore(_))).count();
+        let asterisk_count = tokens
+            .iter()
+            .filter(|t| matches!(t, Token::Asterisk(_)))
+            .count();
+        let underscore_count = tokens
+            .iter()
+            .filter(|t| matches!(t, Token::Underscore(_)))
+            .count();
 
         assert!(asterisk_count > 0);
         assert!(underscore_count > 0);
@@ -957,7 +1004,7 @@ let code = "block";
             ("0", Some(0u32)),
             ("1", Some(1u32)),
             ("4294967295", Some(u32::MAX)), // Max u32
-            ("4294967296", None), // Overflow
+            ("4294967296", None),           // Overflow
             ("99999999999999999999", None), // Way too big
         ];
 
@@ -1000,13 +1047,13 @@ let code = "block";
     #[test]
     fn test_malformed_markdown_patterns() {
         let test_cases = vec![
-            "###",      // Incomplete header
-            "***",      // Incomplete emphasis
-            "```",      // Incomplete code block
-            "|||",      // Multiple pipes
-            ":::",      // Multiple colons
-            "---",      // Multiple hyphens
-            "+++",      // Multiple plus signs
+            "###", // Incomplete header
+            "***", // Incomplete emphasis
+            "```", // Incomplete code block
+            "|||", // Multiple pipes
+            ":::", // Multiple colons
+            "---", // Multiple hyphens
+            "+++", // Multiple plus signs
         ];
 
         for input in test_cases {
@@ -1037,9 +1084,7 @@ let code = "block";
         assert!(positions.iter().any(|(line, _)| *line == 3));
 
         // Verify column resets
-        let line_starts: Vec<_> = positions.iter()
-            .filter(|(_, col)| *col == 1)
-            .collect();
+        let line_starts: Vec<_> = positions.iter().filter(|(_, col)| *col == 1).collect();
         assert!(line_starts.len() >= 3); // At least 3 line starts
     }
 
@@ -1052,7 +1097,10 @@ let code = "block";
             ("mailto:", true),
             ("http://a", true),
             ("https://localhost:8080", true),
-            ("https://example.com/path/to/file.html?query=value#fragment", true),
+            (
+                "https://example.com/path/to/file.html?query=value#fragment",
+                true,
+            ),
             ("not-a-url", false),
             ("ht tp://broken", false),
         ];
@@ -1069,12 +1117,12 @@ let code = "block";
     #[test]
     fn test_whitespace_variations() {
         let inputs = vec![
-            " ",           // Single space
-            "  ",          // Multiple spaces
-            "\t",          // Single tab
-            "\t\t",        // Multiple tabs
-            " \t ",        // Mixed
-            "\t \t \t",    // Complex mix
+            " ",        // Single space
+            "  ",       // Multiple spaces
+            "\t",       // Single tab
+            "\t\t",     // Multiple tabs
+            " \t ",     // Mixed
+            "\t \t \t", // Complex mix
         ];
 
         for input in inputs {
@@ -1092,8 +1140,14 @@ let code = "block";
         let mut lexer = Lexer::new(nested);
         let tokens = lexer.tokenize().unwrap();
 
-        let left_bracket_count = tokens.iter().filter(|t| matches!(t, Token::LeftBracket)).count();
-        let right_bracket_count = tokens.iter().filter(|t| matches!(t, Token::RightBracket)).count();
+        let left_bracket_count = tokens
+            .iter()
+            .filter(|t| matches!(t, Token::LeftBracket))
+            .count();
+        let right_bracket_count = tokens
+            .iter()
+            .filter(|t| matches!(t, Token::RightBracket))
+            .count();
 
         assert_eq!(left_bracket_count, 9);
         assert_eq!(right_bracket_count, 9);
@@ -1114,8 +1168,12 @@ let code = "block";
         assert!(tokens.iter().any(|t| matches!(t, Token::Backtick(1))));
         assert!(tokens.iter().any(|t| {
             if let Token::Text(text) = t {
-                text == "bold" || text == "italic" || text == "underline" ||
-                text == "emphasis" || text == "strike" || text == "code"
+                text == "bold"
+                    || text == "italic"
+                    || text == "underline"
+                    || text == "emphasis"
+                    || text == "strike"
+                    || text == "code"
             } else {
                 false
             }
