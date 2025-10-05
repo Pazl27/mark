@@ -30,6 +30,9 @@ pub enum MarkError {
 
     #[error("Lexer error: {0}")]
     Lexer(#[from] LexerError),
+
+    #[error("Parser error: {0}")]
+    Parser(#[from] ParseError),
 }
 
 /// Configuration-specific error types
@@ -79,6 +82,110 @@ pub enum ConfigError {
     DownloadDeclined,
 }
 
+/// Parser-specific error types
+#[derive(Error, Debug)]
+pub enum ParseError {
+    #[error("Unexpected token at line {line}, column {column}: expected {expected}, found {found}")]
+    UnexpectedToken {
+        expected: String,
+        found: String,
+        line: usize,
+        column: usize,
+    },
+
+    #[error("Unexpected end of input: expected {expected}")]
+    UnexpectedEndOfInput {
+        expected: String,
+    },
+
+    #[error("Invalid heading level {level} at line {line}, column {column}: must be between 1 and 6")]
+    InvalidHeadingLevel {
+        level: u8,
+        line: usize,
+        column: usize,
+    },
+
+    #[error("Malformed link at line {line}, column {column}: {message}")]
+    MalformedLink {
+        message: String,
+        line: usize,
+        column: usize,
+    },
+
+    #[error("Malformed image at line {line}, column {column}: {message}")]
+    MalformedImage {
+        message: String,
+        line: usize,
+        column: usize,
+    },
+
+    #[error("Invalid list structure at line {line}, column {column}: {message}")]
+    InvalidList {
+        message: String,
+        line: usize,
+        column: usize,
+    },
+
+    #[error("Unmatched delimiter '{delimiter}' at line {line}, column {column}")]
+    UnmatchedDelimiter {
+        delimiter: char,
+        line: usize,
+        column: usize,
+    },
+
+    #[error("Invalid table structure at line {line}, column {column}: {message}")]
+    InvalidTable {
+        message: String,
+        line: usize,
+        column: usize,
+    },
+}
+
+impl From<crate::error::LexerError> for ParseError {
+    fn from(lexer_error: crate::error::LexerError) -> Self {
+        match lexer_error {
+            crate::error::LexerError::UnexpectedCharacter { character, line, column } => {
+                ParseError::UnexpectedToken {
+                    expected: "valid markdown character".to_string(),
+                    found: character.to_string(),
+                    line,
+                    column,
+                }
+            }
+            crate::error::LexerError::UnterminatedCodeBlock { line, column } => {
+                ParseError::UnmatchedDelimiter {
+                    delimiter: '`',
+                    line,
+                    column,
+                }
+            }
+            crate::error::LexerError::InvalidSyntax { message, line, column } => {
+                ParseError::UnexpectedToken {
+                    expected: "valid markdown syntax".to_string(),
+                    found: message,
+                    line,
+                    column,
+                }
+            }
+            crate::error::LexerError::InvalidUrl { url, line, column } => {
+                ParseError::MalformedLink {
+                    message: format!("Invalid URL: {}", url),
+                    line,
+                    column,
+                }
+            }
+            crate::error::LexerError::NumberTooLarge { value, line, column } => {
+                ParseError::UnexpectedToken {
+                    expected: "valid number".to_string(),
+                    found: value,
+                    line,
+                    column,
+                }
+            }
+        }
+    }
+}
+
 /// Lexer-specific error types
 #[derive(Error, Debug)]
 pub enum LexerError {
@@ -126,6 +233,9 @@ pub type ConfigResult<T> = std::result::Result<T, ConfigError>;
 /// Result type alias for lexer operations
 pub type LexerResult<T> = std::result::Result<T, LexerError>;
 
+/// Result type alias for parser operations
+pub type ParseResult<T> = std::result::Result<T, ParseError>;
+
 impl MarkError {
     /// Create a new configuration error
     pub fn config<S: Into<String>>(message: S) -> Self {
@@ -157,6 +267,7 @@ impl MarkError {
             Self::Network { .. } => 7,
             Self::Search { .. } => 3,
             Self::Lexer(_) => 65,
+            Self::Parser(_) => 66,
             Self::Io(_) => 1,
         }
     }
@@ -207,6 +318,71 @@ impl ConfigError {
     pub fn download_failed<S: Into<String>>(message: S) -> Self {
         Self::DownloadFailed {
             message: message.into(),
+        }
+    }
+}
+
+impl ParseError {
+    /// Create an unexpected token error
+    pub fn unexpected_token<S: Into<String>>(expected: S, found: S, line: usize, column: usize) -> Self {
+        Self::UnexpectedToken {
+            expected: expected.into(),
+            found: found.into(),
+            line,
+            column,
+        }
+    }
+
+    /// Create an unexpected end of input error
+    pub fn unexpected_end_of_input<S: Into<String>>(expected: S) -> Self {
+        Self::UnexpectedEndOfInput {
+            expected: expected.into(),
+        }
+    }
+
+    /// Create an invalid heading level error
+    pub fn invalid_heading_level(level: u8, line: usize, column: usize) -> Self {
+        Self::InvalidHeadingLevel { level, line, column }
+    }
+
+    /// Create a malformed link error
+    pub fn malformed_link<S: Into<String>>(message: S, line: usize, column: usize) -> Self {
+        Self::MalformedLink {
+            message: message.into(),
+            line,
+            column,
+        }
+    }
+
+    /// Create a malformed image error
+    pub fn malformed_image<S: Into<String>>(message: S, line: usize, column: usize) -> Self {
+        Self::MalformedImage {
+            message: message.into(),
+            line,
+            column,
+        }
+    }
+
+    /// Create an invalid list error
+    pub fn invalid_list<S: Into<String>>(message: S, line: usize, column: usize) -> Self {
+        Self::InvalidList {
+            message: message.into(),
+            line,
+            column,
+        }
+    }
+
+    /// Create an unmatched delimiter error
+    pub fn unmatched_delimiter(delimiter: char, line: usize, column: usize) -> Self {
+        Self::UnmatchedDelimiter { delimiter, line, column }
+    }
+
+    /// Create an invalid table error
+    pub fn invalid_table<S: Into<String>>(message: S, line: usize, column: usize) -> Self {
+        Self::InvalidTable {
+            message: message.into(),
+            line,
+            column,
         }
     }
 }
@@ -296,6 +472,9 @@ mod tests {
 
         let lexer_error = MarkError::Lexer(LexerError::unexpected_character('$', 1, 5));
         assert_eq!(lexer_error.exit_code(), 65);
+
+        let parser_error = MarkError::Parser(ParseError::unexpected_token("heading", "text", 1, 1));
+        assert_eq!(parser_error.exit_code(), 66);
     }
 
     #[test]
@@ -312,5 +491,25 @@ mod tests {
         let invalid_syntax = LexerError::invalid_syntax("Missing closing bracket", 3, 15);
         assert!(invalid_syntax.to_string().contains("Missing closing bracket"));
         assert!(invalid_syntax.to_string().contains("line 3"));
+    }
+
+    #[test]
+    fn test_parser_errors() {
+        let unexpected_token = ParseError::unexpected_token("heading", "text", 1, 5);
+        assert!(unexpected_token.to_string().contains("expected heading"));
+        assert!(unexpected_token.to_string().contains("found text"));
+        assert!(unexpected_token.to_string().contains("line 1"));
+        assert!(unexpected_token.to_string().contains("column 5"));
+
+        let unexpected_end = ParseError::unexpected_end_of_input("closing bracket");
+        assert!(unexpected_end.to_string().contains("expected closing bracket"));
+
+        let invalid_heading = ParseError::invalid_heading_level(7, 2, 10);
+        assert!(invalid_heading.to_string().contains("level 7"));
+        assert!(invalid_heading.to_string().contains("between 1 and 6"));
+
+        let malformed_link = ParseError::malformed_link("Missing URL", 3, 15);
+        assert!(malformed_link.to_string().contains("Missing URL"));
+        assert!(malformed_link.to_string().contains("line 3"));
     }
 }
