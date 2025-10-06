@@ -15,7 +15,10 @@ pub fn find_markdown_files(dir: &str) -> Result<Vec<MarkdownFile>> {
     find_markdown_files_with_ignored(dir, &[])
 }
 
-pub fn find_markdown_files_with_ignored(dir: &str, ignored_dirs: &[String]) -> Result<Vec<MarkdownFile>> {
+pub fn find_markdown_files_with_ignored(
+    dir: &str,
+    ignored_dirs: &[String],
+) -> Result<Vec<MarkdownFile>> {
     let expanded_dir = expand_tilde(dir)?;
     let paths: Vec<PathBuf> = WalkDir::new(expanded_dir)
         .into_iter()
@@ -23,7 +26,8 @@ pub fn find_markdown_files_with_ignored(dir: &str, ignored_dirs: &[String]) -> R
         .filter(|e| {
             // Skip if path contains any ignored directories
             !e.path().components().any(|component| {
-                component.as_os_str()
+                component
+                    .as_os_str()
                     .to_str()
                     .map(|s| ignored_dirs.contains(&s.to_string()))
                     .unwrap_or(false)
@@ -52,7 +56,10 @@ pub fn find_markdown_files_without_hidden(dir: &str) -> Result<Vec<MarkdownFile>
     find_markdown_files_without_hidden_with_ignored(dir, &[])
 }
 
-pub fn find_markdown_files_without_hidden_with_ignored(dir: &str, ignored_dirs: &[String]) -> Result<Vec<MarkdownFile>> {
+pub fn find_markdown_files_without_hidden_with_ignored(
+    dir: &str,
+    ignored_dirs: &[String],
+) -> Result<Vec<MarkdownFile>> {
     let expanded_dir = expand_tilde(dir)?;
     let search_root = expanded_dir.clone();
     let paths: Vec<PathBuf> = WalkDir::new(expanded_dir)
@@ -61,7 +68,7 @@ pub fn find_markdown_files_without_hidden_with_ignored(dir: &str, ignored_dirs: 
         .filter(|e| {
             // Skip if the file is inside a hidden directory (relative to search root)
             let path = e.path();
-            
+
             // Get the relative path from search root
             if let Ok(relative_path) = path.strip_prefix(&search_root) {
                 // Check if any component in the relative path is a hidden directory
@@ -78,7 +85,8 @@ pub fn find_markdown_files_without_hidden_with_ignored(dir: &str, ignored_dirs: 
         .filter(|e| {
             // Skip if path contains any ignored directories
             !e.path().components().any(|component| {
-                component.as_os_str()
+                component
+                    .as_os_str()
                     .to_str()
                     .map(|s| ignored_dirs.contains(&s.to_string()))
                     .unwrap_or(false)

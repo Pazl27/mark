@@ -115,8 +115,6 @@ impl MarkConfig {
             }
         }
 
-
-
         // Validate theme value
         if let Some(theme) = settings["theme"].as_str() {
             if theme != "dark" && theme != "light" {

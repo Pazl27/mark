@@ -20,10 +20,7 @@ pub fn run() -> Result<()> {
     let config = loader.config();
 
     if cli.all {
-        let directory = cli.file
-            .as_ref()
-            .and_then(|p| p.to_str())
-            .unwrap_or(".");
+        let directory = cli.file.as_ref().and_then(|p| p.to_str()).unwrap_or(".");
         launch_file_browser(directory, &config, true)?;
         return Ok(());
     }
@@ -36,7 +33,7 @@ pub fn run() -> Result<()> {
                 // TODO: Launch markdown viewer with the specific file
                 Ok(())
             } else if path.is_dir() {
-        launch_file_browser(path.to_str().unwrap(), &config, false)?;
+                launch_file_browser(path.to_str().unwrap(), &config, false)?;
                 Ok(())
             } else {
                 eprintln!("Error: Path does not exist: {}", path.display());
@@ -54,13 +51,13 @@ pub fn run() -> Result<()> {
 fn launch_file_browser(directory: &str, config: &MarkConfig, show_all: bool) -> Result<()> {
     // Initialize terminal
     let mut terminal = ui::init()?;
-    
+
     // Create and run the app
     let result = run_app(directory, &mut terminal, config, show_all);
-    
+
     // Always restore terminal, even if there was an error
     ui::restore()?;
-    
+
     match result {
         Ok(Some(file)) => {
             println!("Selected file: {}", file.path.display());
@@ -75,7 +72,12 @@ fn launch_file_browser(directory: &str, config: &MarkConfig, show_all: bool) -> 
     }
 }
 
-fn run_app(directory: &str, terminal: &mut crate::ui::Tui, config: &MarkConfig, show_all: bool) -> Result<Option<crate::search::MarkdownFile>> {
+fn run_app(
+    directory: &str,
+    terminal: &mut crate::ui::Tui,
+    config: &MarkConfig,
+    show_all: bool,
+) -> Result<Option<crate::search::MarkdownFile>> {
     let mut app = App::new(directory, config, show_all)?;
     app.run(terminal)
 }

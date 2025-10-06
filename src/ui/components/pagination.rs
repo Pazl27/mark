@@ -26,14 +26,10 @@ impl Pagination {
             "Page 1 of 1".to_string()
         };
 
-        let pagination_span = Span::styled(
-            page_text,
-            Style::default()
-                .fg(Color::Rgb(150, 150, 200)),
-        );
+        let pagination_span =
+            Span::styled(page_text, Style::default().fg(Color::Rgb(150, 150, 200)));
 
-        let pagination = Paragraph::new(Line::from(pagination_span))
-            .alignment(Alignment::Center);
+        let pagination = Paragraph::new(Line::from(pagination_span)).alignment(Alignment::Center);
 
         frame.render_widget(pagination, area);
     }

@@ -54,76 +54,137 @@ impl HelpPopup {
 
         // Create help content
         let help_lines = vec![
-            Line::from(vec![
-                Span::styled("Navigation:", Style::default().fg(Color::Rgb(255, 200, 100)).add_modifier(Modifier::BOLD)),
-            ]),
+            Line::from(vec![Span::styled(
+                "Navigation:",
+                Style::default()
+                    .fg(Color::Rgb(255, 200, 100))
+                    .add_modifier(Modifier::BOLD),
+            )]),
             Line::from(vec![
                 Span::styled("  j / ↓", Style::default().fg(Color::Rgb(100, 200, 255))),
-                Span::styled("        Move down", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "        Move down",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![
                 Span::styled("  k / ↑", Style::default().fg(Color::Rgb(100, 200, 255))),
-                Span::styled("        Move up", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "        Move up",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![
                 Span::styled("  h / ←", Style::default().fg(Color::Rgb(100, 200, 255))),
-                Span::styled("        Previous page", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "        Previous page",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![
                 Span::styled("  l / →", Style::default().fg(Color::Rgb(100, 200, 255))),
-                Span::styled("        Next page", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "        Next page",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![
                 Span::styled("  gg", Style::default().fg(Color::Rgb(100, 200, 255))),
-                Span::styled("          Go to top", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "          Go to top",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![
                 Span::styled("  G", Style::default().fg(Color::Rgb(100, 200, 255))),
-                Span::styled("           Go to bottom", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "           Go to bottom",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![]),
-            Line::from(vec![
-                Span::styled("Search:", Style::default().fg(Color::Rgb(255, 200, 100)).add_modifier(Modifier::BOLD)),
-            ]),
+            Line::from(vec![Span::styled(
+                "Search:",
+                Style::default()
+                    .fg(Color::Rgb(255, 200, 100))
+                    .add_modifier(Modifier::BOLD),
+            )]),
             Line::from(vec![
                 Span::styled("  /", Style::default().fg(Color::Rgb(255, 200, 100))),
-                Span::styled("           Start search/filter", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "           Start search/filter",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![
                 Span::styled("  Enter", Style::default().fg(Color::Rgb(255, 200, 100))),
-                Span::styled("       Apply search filter", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "       Apply search filter",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![
                 Span::styled("  Esc", Style::default().fg(Color::Rgb(255, 200, 100))),
-                Span::styled("         Exit search/show all", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "         Exit search/show all",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![]),
-            Line::from(vec![
-                Span::styled("Actions:", Style::default().fg(Color::Rgb(255, 200, 100)).add_modifier(Modifier::BOLD)),
-            ]),
+            Line::from(vec![Span::styled(
+                "Actions:",
+                Style::default()
+                    .fg(Color::Rgb(255, 200, 100))
+                    .add_modifier(Modifier::BOLD),
+            )]),
             Line::from(vec![
                 Span::styled("  Enter", Style::default().fg(Color::Rgb(100, 255, 100))),
-                Span::styled("       Open selected file", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "       Open selected file",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![
                 Span::styled("  q", Style::default().fg(Color::Rgb(255, 100, 100))),
-                Span::styled("           Quit application", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "           Quit application",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![]),
-            Line::from(vec![
-                Span::styled("Help:", Style::default().fg(Color::Rgb(255, 200, 100)).add_modifier(Modifier::BOLD)),
-            ]),
+            Line::from(vec![Span::styled(
+                "Help:",
+                Style::default()
+                    .fg(Color::Rgb(255, 200, 100))
+                    .add_modifier(Modifier::BOLD),
+            )]),
             Line::from(vec![
                 Span::styled("  ?", Style::default().fg(Color::Rgb(255, 200, 100))),
-                Span::styled("           Show/hide this help", Style::default().fg(Color::Rgb(200, 200, 200))),
+                Span::styled(
+                    "           Show/hide this help",
+                    Style::default().fg(Color::Rgb(200, 200, 200)),
+                ),
             ]),
             Line::from(vec![]),
             Line::from(vec![
                 Span::styled("Press ", Style::default().fg(Color::Rgb(150, 150, 150))),
-                Span::styled("?", Style::default().fg(Color::Rgb(255, 200, 100)).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "?",
+                    Style::default()
+                        .fg(Color::Rgb(255, 200, 100))
+                        .add_modifier(Modifier::BOLD),
+                ),
                 Span::styled(" or ", Style::default().fg(Color::Rgb(150, 150, 150))),
-                Span::styled("Esc", Style::default().fg(Color::Rgb(255, 200, 100)).add_modifier(Modifier::BOLD)),
-                Span::styled(" to close this help", Style::default().fg(Color::Rgb(150, 150, 150))),
+                Span::styled(
+                    "Esc",
+                    Style::default()
+                        .fg(Color::Rgb(255, 200, 100))
+                        .add_modifier(Modifier::BOLD),
+                ),
+                Span::styled(
+                    " to close this help",
+                    Style::default().fg(Color::Rgb(150, 150, 150)),
+                ),
             ]),
         ];
 

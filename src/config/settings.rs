@@ -10,8 +10,6 @@ pub struct Settings {
     pub ignored_dirs: Vec<String>,
 }
 
-
-
 impl Settings {
     /// Validate the settings configuration
     pub fn validate(&self) -> ConfigResult<()> {

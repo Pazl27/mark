@@ -413,7 +413,11 @@ impl FileList {
                 }
 
                 // Add matched character (normal color)
-                let char_end = text[index..].char_indices().nth(1).map(|(i, _)| index + i).unwrap_or(text.len());
+                let char_end = text[index..]
+                    .char_indices()
+                    .nth(1)
+                    .map(|(i, _)| index + i)
+                    .unwrap_or(text.len());
                 spans.push(Span::styled(
                     text[index..char_end].to_string(),
                     Style::default().fg(Color::Rgb(200, 200, 200)),
@@ -454,14 +458,15 @@ impl FileList {
             for &index in &indices {
                 // Add text before match (normal style)
                 if index > last_end {
-                    spans.push(Span::styled(
-                        text[last_end..index].to_string(),
-                        base_style,
-                    ));
+                    spans.push(Span::styled(text[last_end..index].to_string(), base_style));
                 }
 
                 // Add matched character (underlined)
-                let char_end = text[index..].char_indices().nth(1).map(|(i, _)| index + i).unwrap_or(text.len());
+                let char_end = text[index..]
+                    .char_indices()
+                    .nth(1)
+                    .map(|(i, _)| index + i)
+                    .unwrap_or(text.len());
                 spans.push(Span::styled(
                     text[index..char_end].to_string(),
                     base_style.add_modifier(Modifier::UNDERLINED),

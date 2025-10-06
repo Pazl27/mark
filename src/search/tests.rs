@@ -429,13 +429,13 @@ mod tests {
         File::create(normal_dir.join("readme.md")).unwrap(); // Should be included
 
         let result = super::super::find_all_markdown_files_unfiltered(dir_path.to_str().unwrap());
-        
+
         assert!(result.is_ok());
         let files = result.unwrap();
 
         // Should find ALL 5 files: root.md, secret.md (in hidden dir), readme.md, package.md (in node_modules), main.md (in go)
         assert_eq!(files.len(), 5);
-        
+
         let file_names: Vec<String> = files.iter().map(|f| f.name.clone()).collect();
         assert!(file_names.contains(&"root.md".to_string()));
         assert!(file_names.contains(&"secret.md".to_string()));
@@ -467,19 +467,26 @@ mod tests {
         let ignored_dirs: Vec<String> = vec!["node_modules".to_string()];
 
         // Test find_all_unfiltered - should include everything (hidden + ignored)
-        let all_result = super::super::find_all_markdown_files_unfiltered(dir_path.to_str().unwrap());
+        let all_result =
+            super::super::find_all_markdown_files_unfiltered(dir_path.to_str().unwrap());
         assert!(all_result.is_ok());
         let all_files = all_result.unwrap();
         assert_eq!(all_files.len(), 4); // Should find all 4 files including node_modules
 
         // Test without_hidden - should exclude hidden directories but still respect ignored_dirs
-        let without_hidden_result = super::super::find_markdown_files_without_hidden_with_ignored(dir_path.to_str().unwrap(), &ignored_dirs);
+        let without_hidden_result = super::super::find_markdown_files_without_hidden_with_ignored(
+            dir_path.to_str().unwrap(),
+            &ignored_dirs,
+        );
         assert!(without_hidden_result.is_ok());
         let without_hidden_files = without_hidden_result.unwrap();
-        
+
         assert_eq!(without_hidden_files.len(), 2); // Should find only 2 files (not the ones in .hidden or node_modules)
-        
-        let without_hidden_names: Vec<String> = without_hidden_files.iter().map(|f| f.name.clone()).collect();
+
+        let without_hidden_names: Vec<String> = without_hidden_files
+            .iter()
+            .map(|f| f.name.clone())
+            .collect();
         assert!(!without_hidden_names.contains(&"secret.md".to_string()));
         assert!(!without_hidden_names.contains(&"package.md".to_string()));
         assert!(without_hidden_names.contains(&"root.md".to_string()));

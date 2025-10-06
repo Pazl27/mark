@@ -1,5 +1,8 @@
 use crate::error::Result;
-use crate::search::{find_markdown_files_with_ignored, find_markdown_files_without_hidden_with_ignored, find_all_markdown_files_unfiltered, MarkdownFile};
+use crate::search::{
+    find_all_markdown_files_unfiltered, find_markdown_files_with_ignored,
+    find_markdown_files_without_hidden_with_ignored, MarkdownFile,
+};
 use crate::ui::{events::EventHandler, file_browser::FileBrowser, Event};
 use crossterm::event::KeyEvent;
 use ratatui::Frame;
@@ -11,13 +14,20 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(directory: &str, config: &crate::config::MarkConfig, show_all: bool) -> Result<Self> {
+    pub fn new(
+        directory: &str,
+        config: &crate::config::MarkConfig,
+        show_all: bool,
+    ) -> Result<Self> {
         let files = if show_all {
             find_all_markdown_files_unfiltered(directory)?
         } else if config.settings.hidden_files {
             find_markdown_files_with_ignored(directory, &config.settings.ignored_dirs)?
         } else {
-            find_markdown_files_without_hidden_with_ignored(directory, &config.settings.ignored_dirs)?
+            find_markdown_files_without_hidden_with_ignored(
+                directory,
+                &config.settings.ignored_dirs,
+            )?
         };
         let file_browser = FileBrowser::new(files);
         let event_handler = EventHandler::new(100); // 100ms tick rate for cursor blinking

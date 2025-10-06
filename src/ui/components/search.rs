@@ -89,12 +89,10 @@ impl SearchBar {
             true
         };
 
-        let mut spans = vec![
-            Span::styled(
-                "Filter: ",
-                Style::default().fg(Color::Rgb(100, 200, 255)),
-            )
-        ];
+        let mut spans = vec![Span::styled(
+            "Filter: ",
+            Style::default().fg(Color::Rgb(100, 200, 255)),
+        )];
 
         // Split query at cursor position
         let before_cursor = &self.query[..self.cursor_position];
@@ -144,8 +142,7 @@ impl SearchBar {
         }
 
         let search_line = Line::from(spans);
-        let search_paragraph = Paragraph::new(search_line)
-            .alignment(Alignment::Left);
+        let search_paragraph = Paragraph::new(search_line).alignment(Alignment::Left);
 
         frame.render_widget(search_paragraph, area);
     }

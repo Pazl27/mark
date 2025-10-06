@@ -25,7 +25,13 @@ impl Header {
         }
     }
 
-    pub fn set_search_mode(&mut self, is_searching: bool, query: &str, filtered_count: usize, original_count: usize) {
+    pub fn set_search_mode(
+        &mut self,
+        is_searching: bool,
+        query: &str,
+        filtered_count: usize,
+        original_count: usize,
+    ) {
         self.is_searching = is_searching;
         self.search_query = query.to_string();
         self.original_count = original_count;
@@ -40,10 +46,10 @@ impl Header {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length(1),  // Title
-                Constraint::Length(1),  // Empty line
-                Constraint::Length(1),  // Elements count
-                Constraint::Length(1),  // Empty line
+                Constraint::Length(1), // Title
+                Constraint::Length(1), // Empty line
+                Constraint::Length(1), // Elements count
+                Constraint::Length(1), // Empty line
             ])
             .split(area);
 
@@ -59,15 +65,35 @@ impl Header {
         } else {
             // Create styled title with gradient-like effect
             let title_spans = vec![
-                Span::styled("M", Style::default().fg(Color::Rgb(255, 100, 150)).add_modifier(Modifier::BOLD)),
-                Span::styled("a", Style::default().fg(Color::Rgb(255, 120, 170)).add_modifier(Modifier::BOLD)),
-                Span::styled("r", Style::default().fg(Color::Rgb(255, 140, 190)).add_modifier(Modifier::BOLD)),
-                Span::styled("k", Style::default().fg(Color::Rgb(255, 160, 210)).add_modifier(Modifier::BOLD)),
+                Span::styled(
+                    "M",
+                    Style::default()
+                        .fg(Color::Rgb(255, 100, 150))
+                        .add_modifier(Modifier::BOLD),
+                ),
+                Span::styled(
+                    "a",
+                    Style::default()
+                        .fg(Color::Rgb(255, 120, 170))
+                        .add_modifier(Modifier::BOLD),
+                ),
+                Span::styled(
+                    "r",
+                    Style::default()
+                        .fg(Color::Rgb(255, 140, 190))
+                        .add_modifier(Modifier::BOLD),
+                ),
+                Span::styled(
+                    "k",
+                    Style::default()
+                        .fg(Color::Rgb(255, 160, 210))
+                        .add_modifier(Modifier::BOLD),
+                ),
             ];
 
             let title_line = Line::from(title_spans);
             let title = Paragraph::new(title_line).alignment(Alignment::Center);
-            
+
             // File count info with search query if applicable
             let count_line = if self.is_searching && !self.search_query.is_empty() {
                 Line::from(vec![

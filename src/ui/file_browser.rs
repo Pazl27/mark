@@ -107,8 +107,6 @@ impl FileBrowser {
                     Ok(None)
                 }
             }
-
-
         } else {
             // Normal navigation
             match key.code {
@@ -122,7 +120,9 @@ impl FileBrowser {
                 }
                 KeyCode::Esc => {
                     // Only handle Esc if there's an active search filter
-                    if self.file_list.is_searching() && !self.file_list.get_search_query().is_empty() {
+                    if self.file_list.is_searching()
+                        && !self.file_list.get_search_query().is_empty()
+                    {
                         self.file_list.end_search();
                         self.update_header();
                     }
@@ -195,7 +195,8 @@ impl FileBrowser {
         let query = self.file_list.get_search_query();
         let filtered_count = self.file_list.get_file_count();
         let original_count = self.file_list.get_original_count();
-        self.header.set_search_mode(is_searching, query, filtered_count, original_count);
+        self.header
+            .set_search_mode(is_searching, query, filtered_count, original_count);
     }
 
     pub fn render(&mut self, frame: &mut Frame) {
@@ -208,10 +209,10 @@ impl FileBrowser {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length(4),  // Header
-                Constraint::Min(1),     // File list (flexible)
-                Constraint::Length(1),  // Pagination
-                Constraint::Length(1),  // Help
+                Constraint::Length(4), // Header
+                Constraint::Min(1),    // File list (flexible)
+                Constraint::Length(1), // Pagination
+                Constraint::Length(1), // Help
             ])
             .split(size);
 
@@ -224,10 +225,8 @@ impl FileBrowser {
         self.file_list.render(frame, chunks[1]);
 
         // Render pagination
-        let pagination = Pagination::new(
-            self.file_list.current_page(),
-            self.file_list.total_pages(),
-        );
+        let pagination =
+            Pagination::new(self.file_list.current_page(), self.file_list.total_pages());
         pagination.render(frame, chunks[2]);
 
         self.help.render(frame, chunks[3]);
