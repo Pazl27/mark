@@ -6,8 +6,11 @@ pub struct Settings {
     pub theme: String,
     pub width: usize,
     pub syntax_highlighting: bool,
-    pub line_numbers: bool,
+    pub hidden_files: bool,
+    pub ignored_dirs: Vec<String>,
 }
+
+
 
 impl Settings {
     /// Validate the settings configuration
@@ -51,7 +54,8 @@ mod tests {
             theme: "dark".to_string(),
             width: 80,
             syntax_highlighting: true,
-            line_numbers: false,
+            hidden_files: false,
+            ignored_dirs: vec!["node_modules".to_string(), "go".to_string()],
         };
 
         assert!(settings.validate().is_ok());
@@ -65,7 +69,8 @@ mod tests {
             theme: "invalid".to_string(),
             width: 80,
             syntax_highlighting: true,
-            line_numbers: false,
+            hidden_files: false,
+            ignored_dirs: vec![],
         };
 
         let result = settings.validate();
@@ -82,7 +87,8 @@ mod tests {
             theme: "dark".to_string(),
             width: 300, // Too large
             syntax_highlighting: true,
-            line_numbers: false,
+            hidden_files: false,
+            ignored_dirs: vec![],
         };
 
         let result = settings.validate();
@@ -99,14 +105,16 @@ mod tests {
             theme: "dark".to_string(),
             width: 80,
             syntax_highlighting: true,
-            line_numbers: false,
+            hidden_files: false,
+            ignored_dirs: vec![],
         };
 
         let light_settings = Settings {
             theme: "light".to_string(),
             width: 80,
             syntax_highlighting: true,
-            line_numbers: false,
+            hidden_files: false,
+            ignored_dirs: vec![],
         };
 
         assert!(dark_settings.is_dark_theme());

@@ -87,7 +87,8 @@ impl MarkConfig {
             ("theme", "string"),
             ("width", "integer"),
             ("syntax_highlighting", "boolean"),
-            ("line_numbers", "boolean"),
+            ("hidden_files", "boolean"),
+            ("ignored_dirs", "array"),
         ];
 
         for (field, expected_type) in required_fields {
@@ -100,6 +101,7 @@ impl MarkConfig {
                 "string" => value.is_str(),
                 "integer" => value.is_integer(),
                 "boolean" => value.is_bool(),
+                "array" => value.is_array(),
                 _ => false,
             };
 
@@ -112,6 +114,8 @@ impl MarkConfig {
                 ));
             }
         }
+
+
 
         // Validate theme value
         if let Some(theme) = settings["theme"].as_str() {
@@ -293,39 +297,40 @@ mod tests {
 
     #[test]
     fn test_invalid_theme() {
-        let invalid_config = "
+        let invalid_config = r##"
         [settings]
-        theme = \"invalid\"
+        theme = "invalid"
         width = 80
         syntax_highlighting = true
-        line_numbers = false
+        hidden_files = true
+        ignored_dirs = []
 
         [color.dark]
-        background = \"#000000\"
-        text = \"#ffffff\"
-        code_block = \"#333333\"
-        h1 = \"#ff0000\"
-        h2 = \"#ff0000\"
-        h3 = \"#ff0000\"
-        h4 = \"#ff0000\"
-        h5 = \"#ff0000\"
-        h6 = \"#ff0000\"
-        link = \"#0000ff\"
-        passive = \"#888888\"
+        background = "#000000"
+        text = "#ffffff"
+        code_block = "#333333"
+        h1 = "#ff0000"
+        h2 = "#ff0000"
+        h3 = "#ff0000"
+        h4 = "#ff0000"
+        h5 = "#ff0000"
+        h6 = "#ff0000"
+        link = "#0000ff"
+        passive = "#888888"
 
         [color.light]
-        background = \"#ffffff\"
-        text = \"#000000\"
-        code_block = \"#f0f0f0\"
-        h1 = \"#ff0000\"
-        h2 = \"#ff0000\"
-        h3 = \"#ff0000\"
-        h4 = \"#ff0000\"
-        h5 = \"#ff0000\"
-        h6 = \"#ff0000\"
-        link = \"#0000ff\"
-        passive = \"#888888\"
-        ";
+        background = "#ffffff"
+        text = "#000000"
+        code_block = "#f0f0f0"
+        h1 = "#ff0000"
+        h2 = "#ff0000"
+        h3 = "#ff0000"
+        h4 = "#ff0000"
+        h5 = "#ff0000"
+        h6 = "#ff0000"
+        link = "#0000ff"
+        passive = "#888888"
+        "##;
 
         let result = MarkConfig::from_toml(invalid_config);
         assert!(result.is_err());
@@ -337,39 +342,40 @@ mod tests {
 
     #[test]
     fn test_invalid_color_format() {
-        let invalid_config = "
+        let invalid_config = r##"
         [settings]
-        theme = \"dark\"
+        theme = "dark"
         width = 80
         syntax_highlighting = true
-        line_numbers = false
+        hidden_files = true
+        ignored_dirs = ["node_modules", "go"]
 
         [color.dark]
-        background = \"not-a-color\"
-        text = \"#ffffff\"
-        code_block = \"#333333\"
-        h1 = \"#ff0000\"
-        h2 = \"#ff0000\"
-        h3 = \"#ff0000\"
-        h4 = \"#ff0000\"
-        h5 = \"#ff0000\"
-        h6 = \"#ff0000\"
-        link = \"#0000ff\"
-        passive = \"#888888\"
+        background = "not-a-color"
+        text = "#ffffff"
+        code_block = "#333333"
+        h1 = "#ff0000"
+        h2 = "#ff0000"
+        h3 = "#ff0000"
+        h4 = "#ff0000"
+        h5 = "#ff0000"
+        h6 = "#ff0000"
+        link = "#0000ff"
+        passive = "#888888"
 
         [color.light]
-        background = \"#ffffff\"
-        text = \"#000000\"
-        code_block = \"#f0f0f0\"
-        h1 = \"#ff0000\"
-        h2 = \"#ff0000\"
-        h3 = \"#ff0000\"
-        h4 = \"#ff0000\"
-        h5 = \"#ff0000\"
-        h6 = \"#ff0000\"
-        link = \"#0000ff\"
-        passive = \"#888888\"
-        ";
+        background = "#ffffff"
+        text = "#000000"
+        code_block = "#f0f0f0"
+        h1 = "#ff0000"
+        h2 = "#ff0000"
+        h3 = "#ff0000"
+        h4 = "#ff0000"
+        h5 = "#ff0000"
+        h6 = "#ff0000"
+        link = "#0000ff"
+        passive = "#888888"
+        "##;
 
         let result = MarkConfig::from_toml(invalid_config);
         assert!(result.is_err());
@@ -381,39 +387,40 @@ mod tests {
 
     #[test]
     fn test_valid_config() {
-        let valid_config = "
+        let valid_config = r##"
         [settings]
-        theme = \"dark\"
+        theme = "dark"
         width = 80
         syntax_highlighting = true
-        line_numbers = false
+        hidden_files = false
+        ignored_dirs = []
 
         [color.dark]
-        background = \"#000000\"
-        text = \"#ffffff\"
-        code_block = \"#333333\"
-        h1 = \"#ff0000\"
-        h2 = \"#ff0000\"
-        h3 = \"#ff0000\"
-        h4 = \"#ff0000\"
-        h5 = \"#ff0000\"
-        h6 = \"#ff0000\"
-        link = \"#0000ff\"
-        passive = \"#888888\"
+        background = "#000000"
+        text = "#ffffff"
+        code_block = "#333333"
+        h1 = "#ff0000"
+        h2 = "#ff0000"
+        h3 = "#ff0000"
+        h4 = "#ff0000"
+        h5 = "#ff0000"
+        h6 = "#ff0000"
+        link = "#0000ff"
+        passive = "#888888"
 
         [color.light]
-        background = \"#ffffff\"
-        text = \"#000000\"
-        code_block = \"#f0f0f0\"
-        h1 = \"#ff0000\"
-        h2 = \"#ff0000\"
-        h3 = \"#ff0000\"
-        h4 = \"#ff0000\"
-        h5 = \"#ff0000\"
-        h6 = \"#ff0000\"
-        link = \"#0000ff\"
-        passive = \"#888888\"
-        ";
+        background = "#ffffff"
+        text = "#000000"
+        code_block = "#f0f0f0"
+        h1 = "#ff0000"
+        h2 = "#ff0000"
+        h3 = "#ff0000"
+        h4 = "#ff0000"
+        h5 = "#ff0000"
+        h6 = "#ff0000"
+        link = "#0000ff"
+        passive = "#888888"
+        "##;
 
         let result = MarkConfig::from_toml(valid_config);
         assert!(result.is_ok());

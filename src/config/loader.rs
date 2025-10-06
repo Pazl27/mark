@@ -267,7 +267,8 @@ mod tests {
 theme = "dark"
 width = 80
 syntax_highlighting = true
-line_numbers = false
+hidden_files = false
+ignored_dirs = ["node_modules", "go", ".git"]
 
 [color.dark]
 background = "#000000"

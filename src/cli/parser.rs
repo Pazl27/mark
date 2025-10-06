@@ -10,8 +10,9 @@ use std::path::PathBuf;
 USAGE MODES:
   • With file:    mark README.md           - Opens the specific file directly
   • Without file: mark                     - Opens file browser for current directory
-  • Browse home:  mark -a                  - Shows all markdown files in $HOME
-  • Browse all:   mark /path/to/directory  - Browse files in specified directory")]
+  • Browse all:   mark -a                  - Shows ALL markdown files (including hidden AND ignored) in current directory
+  • Browse all:   mark -a /path/to/dir     - Shows ALL markdown files (including hidden AND ignored) in specified directory
+  • Browse dir:   mark /path/to/directory  - Browse files in specified directory (respects hidden_files setting and ignored_dirs)")]
 pub struct Cli {
     /// Path to markdown file or directory to browse (optional)
     pub file: Option<PathBuf>,
@@ -24,7 +25,7 @@ pub struct Cli {
     #[arg(short = 'w', long = "width", value_name = "WIDTH", default_value = "0")]
     pub width: usize,
 
-    /// Browse ALL markdown files from $HOME directory recursively
+    /// Browse ALL markdown files recursively (including hidden ones AND ignored directories - shows everything)
     #[arg(short = 'a', long = "all")]
     pub all: bool,
 }

@@ -3,6 +3,7 @@ use chrono::{DateTime, Local};
 use crate::error::Result;
 use std::{io::Read, path::PathBuf};
 
+#[derive(Clone)]
 pub struct MarkdownFile {
     pub path: PathBuf,
     pub name: String,

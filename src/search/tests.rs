@@ -404,4 +404,85 @@ mod tests {
             .unwrap()
             .contains("power users"));
     }
+
+    #[test]
+    fn test_find_all_markdown_files_unfiltered() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir_path = temp_dir.path();
+
+        // Create directory structure including hidden dirs and ignored dirs
+        let node_modules = dir_path.join("node_modules");
+        let go_dir = dir_path.join("go");
+        let hidden_dir = dir_path.join(".hidden");
+        let normal_dir = dir_path.join("docs");
+
+        fs::create_dir_all(&node_modules).unwrap();
+        fs::create_dir_all(&go_dir).unwrap();
+        fs::create_dir_all(&hidden_dir).unwrap();
+        fs::create_dir_all(&normal_dir).unwrap();
+
+        // Create markdown files in different directories
+        File::create(dir_path.join("root.md")).unwrap();
+        File::create(node_modules.join("package.md")).unwrap(); // Should be ignored
+        File::create(go_dir.join("main.md")).unwrap(); // Should be ignored
+        File::create(hidden_dir.join("secret.md")).unwrap(); // Should be included
+        File::create(normal_dir.join("readme.md")).unwrap(); // Should be included
+
+        let result = super::super::find_all_markdown_files_unfiltered(dir_path.to_str().unwrap());
+        
+        assert!(result.is_ok());
+        let files = result.unwrap();
+
+        // Should find ALL 5 files: root.md, secret.md (in hidden dir), readme.md, package.md (in node_modules), main.md (in go)
+        assert_eq!(files.len(), 5);
+        
+        let file_names: Vec<String> = files.iter().map(|f| f.name.clone()).collect();
+        assert!(file_names.contains(&"root.md".to_string()));
+        assert!(file_names.contains(&"secret.md".to_string()));
+        assert!(file_names.contains(&"readme.md".to_string()));
+        assert!(file_names.contains(&"package.md".to_string()));
+        assert!(file_names.contains(&"main.md".to_string()));
+    }
+
+    #[test]
+    fn test_find_all_vs_without_hidden_difference() {
+        let temp_dir = TempDir::new().unwrap();
+        let dir_path = temp_dir.path();
+
+        // Create both hidden and normal directories, plus an ignored directory
+        let hidden_dir = dir_path.join(".hidden");
+        let normal_dir = dir_path.join("docs");
+        let node_modules = dir_path.join("node_modules");
+
+        fs::create_dir_all(&hidden_dir).unwrap();
+        fs::create_dir_all(&normal_dir).unwrap();
+        fs::create_dir_all(&node_modules).unwrap();
+
+        // Create markdown files
+        File::create(dir_path.join("root.md")).unwrap();
+        File::create(hidden_dir.join("secret.md")).unwrap();
+        File::create(normal_dir.join("public.md")).unwrap();
+        File::create(node_modules.join("package.md")).unwrap();
+
+        let ignored_dirs: Vec<String> = vec!["node_modules".to_string()];
+
+        // Test find_all_unfiltered - should include everything (hidden + ignored)
+        let all_result = super::super::find_all_markdown_files_unfiltered(dir_path.to_str().unwrap());
+        assert!(all_result.is_ok());
+        let all_files = all_result.unwrap();
+        assert_eq!(all_files.len(), 4); // Should find all 4 files including node_modules
+
+        // Test without_hidden - should exclude hidden directories but still respect ignored_dirs
+        let without_hidden_result = super::super::find_markdown_files_without_hidden_with_ignored(dir_path.to_str().unwrap(), &ignored_dirs);
+        assert!(without_hidden_result.is_ok());
+        let without_hidden_files = without_hidden_result.unwrap();
+        
+        assert_eq!(without_hidden_files.len(), 2); // Should find only 2 files (not the ones in .hidden or node_modules)
+        
+        let without_hidden_names: Vec<String> = without_hidden_files.iter().map(|f| f.name.clone()).collect();
+        assert!(!without_hidden_names.contains(&"secret.md".to_string()));
+        assert!(!without_hidden_names.contains(&"package.md".to_string()));
+        assert!(without_hidden_names.contains(&"root.md".to_string()));
+        assert!(without_hidden_names.contains(&"public.md".to_string()));
+    }
 }
