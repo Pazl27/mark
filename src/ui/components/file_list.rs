@@ -231,7 +231,7 @@ impl FileList {
                 .iter()
                 .filter_map(|file| {
                     let path_str = file.path.to_string_lossy();
-                    matcher.fuzzy_match(&path_str, query).map(|_| file.clone())
+                    matcher.fuzzy_match(&path_str, remove_whitespace(query).as_str()).map(|_| file.clone())
                 })
                 .collect();
         }
@@ -341,7 +341,7 @@ impl FileList {
                     Style::default().fg(Color::Rgb(120, 120, 120)) // Normal grey after search applied
                 };
 
-                let path_display = file.path.to_string_lossy().to_string();
+                let path_display = file.name.as_str();
                 let created_text = file
                     .created_at
                     .as_ref()
@@ -400,7 +400,7 @@ impl FileList {
         }
 
         let matcher = SkimMatcherV2::default();
-        if let Some((_, indices)) = matcher.fuzzy_indices(text, query) {
+        if let Some((_, indices)) = matcher.fuzzy_indices(text, remove_whitespace(query).as_str()) {
             let mut last_end = 0;
 
             for &index in &indices {
@@ -487,3 +487,7 @@ impl FileList {
         spans
     }
 }
+
+    fn remove_whitespace(s: &str) -> String {
+        s.chars().filter(|c| !c.is_whitespace()).collect()
+    }

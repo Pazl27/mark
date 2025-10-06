@@ -1,7 +1,7 @@
 use chrono::{DateTime, Local};
 
 use crate::error::Result;
-use std::{io::Read, path::PathBuf};
+use std::{env::current_dir, io::Read, path::PathBuf};
 
 #[derive(Clone)]
 pub struct MarkdownFile {
@@ -13,11 +13,21 @@ pub struct MarkdownFile {
 
 impl MarkdownFile {
     pub fn new(path: PathBuf) -> Self {
+        let current_dir = current_dir().unwrap_or_else(|_| PathBuf::from("."));
+
         let name = path
-            .file_name()
-            .and_then(|n| n.to_str())
+            .strip_prefix(&current_dir)
+            .unwrap_or(&path)
+            .to_str()
             .unwrap_or("unknown")
-            .to_string();
+            .to_owned();
+
+        let name = if name.starts_with("./") {
+            name.trim_start_matches("./").to_string()
+        } else {
+            name
+        };
+
 
         let created_at = std::fs::metadata(&path)
             .and_then(|meta| meta.created())
@@ -29,7 +39,7 @@ impl MarkdownFile {
 
         Self {
             path: path.clone(),
-            name,
+            name: name,
             content: None,
             created_at,
         }
