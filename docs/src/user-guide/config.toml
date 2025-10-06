@@ -1,0 +1,32 @@
+[settings]
+theme = "dark"
+width = 80
+syntax_highlighting = true
+hidden_files = false
+ignored_dirs = ["node_modules", "go", ".git", "target", "build", "dist", ".vscode", ".idea", ".next", "vendor", "__pycache__", ".pytest_cache", "coverage"]
+
+[color.dark]
+background = "#000000"
+text = "#ffffff"
+code_block = "#333333"
+h1 = "#ff0000"
+h2 = "#ff4444"
+h3 = "#ff8888"
+h4 = "#ffaaaa"
+h5 = "#ffcccc"
+h6 = "#ffeeee"
+link = "#0000ff"
+passive = "#888888"
+
+[color.light]
+background = "#ffffff"
+text = "#000000"
+code_block = "#f0f0f0"
+h1 = "#cc0000"
+h2 = "#aa0000"
+h3 = "#880000"
+h4 = "#660000"
+h5 = "#440000"
+h6 = "#220000"
+link = "#0000cc"
+passive = "#666666"

@@ -42,15 +42,15 @@ check_mdbook() {
 # Function to build documentation
 build_docs() {
     print_info "Building documentation..."
-    
+
     # Check if docs directory exists
     if [ ! -d "docs" ]; then
         print_error "docs directory not found"
         exit 1
     fi
-    
+
     cd docs
-    
+
     # Build the book
     if mdbook build; then
         print_success "Documentation built successfully"
@@ -59,25 +59,25 @@ build_docs() {
         print_error "Failed to build documentation"
         exit 1
     fi
-    
+
     cd ..
 }
 
 # Function to serve documentation
 serve_docs() {
     print_info "Starting documentation server..."
-    
+
     # Check if docs directory exists
     if [ ! -d "docs" ]; then
         print_error "docs directory not found"
         exit 1
     fi
-    
+
     cd docs
-    
+
     print_info "Documentation will be available at: http://localhost:3000"
     print_info "Press Ctrl+C to stop the server"
-    
+
     # Serve with live reload
     mdbook serve --hostname 0.0.0.0 --port 3000
 }
@@ -85,24 +85,24 @@ serve_docs() {
 # Function to clean documentation builds
 clean_docs() {
     print_info "Cleaning documentation builds..."
-    
+
     if [ -d "docs/book" ]; then
         rm -rf docs/book
         print_success "Removed docs/book/"
     fi
-    
+
     if [ -d "target/doc-book" ]; then
         rm -rf target/doc-book
         print_success "Removed target/doc-book/"
     fi
-    
+
     print_success "Documentation builds cleaned"
 }
 
 # Function to initialize mdbook (for new projects)
 init_docs() {
     print_info "Initializing mdbook documentation..."
-    
+
     if [ -d "docs" ]; then
         print_warning "docs directory already exists"
         read -p "Do you want to reinitialize? (y/N): " -n 1 -r
@@ -113,7 +113,7 @@ init_docs() {
         fi
         rm -rf docs
     fi
-    
+
     mdbook init docs --title "Mark - Markdown Viewer"
     print_success "Documentation initialized in docs/"
     print_info "Edit docs/src/SUMMARY.md to customize the book structure"
@@ -122,15 +122,15 @@ init_docs() {
 # Function to watch for changes and rebuild
 watch_docs() {
     print_info "Watching documentation for changes..."
-    
+
     # Check if docs directory exists
     if [ ! -d "docs" ]; then
         print_error "docs directory not found"
         exit 1
     fi
-    
+
     cd docs
-    
+
     print_info "Watching for changes... Press Ctrl+C to stop"
     mdbook watch
 }
@@ -138,15 +138,15 @@ watch_docs() {
 # Function to validate documentation
 validate_docs() {
     print_info "Validating documentation..."
-    
+
     # Check if docs directory exists
     if [ ! -d "docs" ]; then
         print_error "docs directory not found"
         exit 1
     fi
-    
+
     cd docs
-    
+
     # Test build
     if mdbook test; then
         print_success "Documentation validation passed"
@@ -154,7 +154,7 @@ validate_docs() {
         print_error "Documentation validation failed"
         exit 1
     fi
-    
+
     cd ..
 }
 
@@ -188,10 +188,10 @@ main() {
         print_error "This script must be run from the project root directory"
         exit 1
     fi
-    
+
     # Check for mdbook installation
     check_mdbook
-    
+
     # Parse command line arguments
     case "${1:-serve}" in
         "build")

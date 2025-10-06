@@ -7,6 +7,7 @@
 - [Installation](user-guide/installation.md)
 - [Getting Started](user-guide/getting-started.md)
 - [Configuration](user-guide/configuration.md)
+  - [Default Config File](user-guide/config.toml)
 - [Usage Examples](user-guide/usage.md)
 
 # Developer Guide
