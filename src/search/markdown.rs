@@ -28,7 +28,6 @@ impl MarkdownFile {
             name
         };
 
-
         let created_at = std::fs::metadata(&path)
             .and_then(|meta| meta.created())
             .ok()
@@ -39,7 +38,7 @@ impl MarkdownFile {
 
         Self {
             path: path.clone(),
-            name: name,
+            name,
             content: None,
             created_at,
         }

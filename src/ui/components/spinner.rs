@@ -1,8 +1,8 @@
 use ratatui::{
+    layout::Rect,
     style::{Color, Style},
     text::{Line, Span},
     widgets::Paragraph,
-    layout::Rect,
     Frame,
 };
 use std::time::{Duration, Instant};

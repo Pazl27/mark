@@ -1,3 +1,4 @@
+use crate::ui::components::spinner::Spinner;
 use ratatui::{
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
@@ -5,7 +6,6 @@ use ratatui::{
     widgets::Paragraph,
     Frame,
 };
-use crate::ui::components::spinner::Spinner;
 
 pub struct Header {
     title: String,
@@ -132,12 +132,10 @@ impl Header {
                 }
                 Line::from(spans)
             } else {
-                let mut spans = vec![
-                    Span::styled(
-                        format!("  {} elements", self.file_count),
-                        Style::default().fg(Color::Rgb(150, 150, 150)),
-                    ),
-                ];
+                let mut spans = vec![Span::styled(
+                    format!("  {} elements", self.file_count),
+                    Style::default().fg(Color::Rgb(150, 150, 150)),
+                )];
                 if self.is_loading {
                     spans.push(Span::raw(" "));
                     spans.push(self.spinner.render_inline());

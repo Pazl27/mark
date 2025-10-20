@@ -277,7 +277,7 @@ mod tests {
     fn test_expand_tilde_home_only() {
         // Save original HOME value
         let original_home = std::env::var("HOME").ok();
-        
+
         // Mock HOME environment variable for testing
         std::env::set_var("HOME", "/home/testuser");
 
@@ -385,7 +385,9 @@ mod tests {
         // Verify file names (they will be full paths, so check endings)
         let names: Vec<&String> = files.iter().map(|f| &f.name).collect();
         assert!(names.iter().any(|name| name.ends_with("README.md")));
-        assert!(names.iter().any(|name| name.ends_with("docs/guides/advanced.md")));
+        assert!(names
+            .iter()
+            .any(|name| name.ends_with("docs/guides/advanced.md")));
         assert!(names.iter().any(|name| name.ends_with("docs/guide.md")));
 
         // Test loading content for each file
@@ -401,21 +403,30 @@ mod tests {
         }
 
         // Verify specific content
-        let readme_file = files.iter().find(|f| f.name.ends_with("README.md")).unwrap();
+        let readme_file = files
+            .iter()
+            .find(|f| f.name.ends_with("README.md"))
+            .unwrap();
         assert!(readme_file
             .content
             .as_ref()
             .unwrap()
             .contains("test project"));
 
-        let guide_file = files.iter().find(|f| f.name.ends_with("docs/guide.md")).unwrap();
+        let guide_file = files
+            .iter()
+            .find(|f| f.name.ends_with("docs/guide.md"))
+            .unwrap();
         assert!(guide_file
             .content
             .as_ref()
             .unwrap()
             .contains("Installation"));
 
-        let advanced_file = files.iter().find(|f| f.name.ends_with("docs/guides/advanced.md")).unwrap();
+        let advanced_file = files
+            .iter()
+            .find(|f| f.name.ends_with("docs/guides/advanced.md"))
+            .unwrap();
         assert!(advanced_file
             .content
             .as_ref()
@@ -459,7 +470,9 @@ mod tests {
         assert!(names.iter().any(|name| name.ends_with("root.md")));
         assert!(names.iter().any(|name| name.ends_with(".hidden/secret.md")));
         assert!(names.iter().any(|name| name.ends_with("docs/readme.md")));
-        assert!(names.iter().any(|name| name.ends_with("node_modules/package.md")));
+        assert!(names
+            .iter()
+            .any(|name| name.ends_with("node_modules/package.md")));
         assert!(names.iter().any(|name| name.ends_with("go/main.md")));
     }
 
@@ -505,7 +518,9 @@ mod tests {
         // Check that files are found using path endings since names will be full paths
         let names: Vec<&String> = without_hidden_files.iter().map(|f| &f.name).collect();
         assert!(!names.iter().any(|name| name.ends_with(".hidden/secret.md")));
-        assert!(!names.iter().any(|name| name.ends_with("node_modules/package.md")));
+        assert!(!names
+            .iter()
+            .any(|name| name.ends_with("node_modules/package.md")));
         assert!(names.iter().any(|name| name.ends_with("root.md")));
         assert!(names.iter().any(|name| name.ends_with("docs/public.md")));
     }

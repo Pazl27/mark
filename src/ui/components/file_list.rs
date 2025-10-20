@@ -231,7 +231,9 @@ impl FileList {
                 .iter()
                 .filter_map(|file| {
                     let path_str = file.path.to_string_lossy();
-                    matcher.fuzzy_match(&path_str, remove_whitespace(query).as_str()).map(|_| file.clone())
+                    matcher
+                        .fuzzy_match(&path_str, remove_whitespace(query).as_str())
+                        .map(|_| file.clone())
                 })
                 .collect();
         }
@@ -272,18 +274,21 @@ impl FileList {
 
     pub fn add_file(&mut self, file: MarkdownFile) {
         self.files.push(file.clone());
-        
+
         // If we're currently searching, also check if this file matches the search
         if self.is_searching && !self.search_query.is_empty() {
             let matcher = SkimMatcherV2::default();
-            if matcher.fuzzy_match(&file.name, remove_whitespace(&self.search_query).as_str()).is_some() {
+            if matcher
+                .fuzzy_match(&file.name, remove_whitespace(&self.search_query).as_str())
+                .is_some()
+            {
                 self.filtered_files.push(file);
             }
         } else if self.is_searching {
             // If searching but no query yet, add to filtered files too
             self.filtered_files.push(file);
         }
-        
+
         // If this is the first file and nothing is selected, select it
         if self.files.len() == 1 && self.state.selected().is_none() {
             self.state.select(Some(0));
@@ -508,6 +513,6 @@ impl FileList {
     }
 }
 
-    fn remove_whitespace(s: &str) -> String {
-        s.chars().filter(|c| !c.is_whitespace()).collect()
-    }
+fn remove_whitespace(s: &str) -> String {
+    s.chars().filter(|c| !c.is_whitespace()).collect()
+}

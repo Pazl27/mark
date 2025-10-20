@@ -1,5 +1,5 @@
-pub mod markdown;
 pub mod background;
+pub mod markdown;
 
 #[cfg(test)]
 mod tests;

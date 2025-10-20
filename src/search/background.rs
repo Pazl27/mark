@@ -26,7 +26,7 @@ impl BackgroundSearcher {
     ) -> Result<Self> {
         let (tx, rx) = mpsc::channel();
         let dir = directory.to_string();
-        
+
         let handle = thread::spawn(move || {
             if let Err(e) = Self::search_files(&tx, &dir, ignored_dirs, show_hidden, show_all) {
                 let _ = tx.send(SearchMessage::Error(e.to_string()));
@@ -43,7 +43,7 @@ impl BackgroundSearcher {
 
     pub fn try_recv(&mut self) -> Vec<SearchMessage> {
         let mut messages = Vec::new();
-        
+
         while let Ok(message) = self.receiver.try_recv() {
             match &message {
                 SearchMessage::Finished => self.is_complete = true,
@@ -51,7 +51,7 @@ impl BackgroundSearcher {
             }
             messages.push(message);
         }
-        
+
         messages
     }
 
@@ -79,13 +79,15 @@ impl BackgroundSearcher {
             }
 
             // Skip if path contains any ignored directories (unless show_all is true)
-            if !show_all && path.components().any(|component| {
-                component
-                    .as_os_str()
-                    .to_str()
-                    .map(|s| ignored_dirs.contains(&s.to_string()))
-                    .unwrap_or(false)
-            }) {
+            if !show_all
+                && path.components().any(|component| {
+                    component
+                        .as_os_str()
+                        .to_str()
+                        .map(|s| ignored_dirs.contains(&s.to_string()))
+                        .unwrap_or(false)
+                })
+            {
                 continue;
             }
 

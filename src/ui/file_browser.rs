@@ -52,7 +52,8 @@ impl FileBrowser {
         let help_popup = HelpPopup::new();
         let search_bar = SearchBar::new();
 
-        let background_searcher = BackgroundSearcher::new(directory, ignored_dirs, show_hidden, show_all)?;
+        let background_searcher =
+            BackgroundSearcher::new(directory, ignored_dirs, show_hidden, show_all)?;
 
         Ok(Self {
             file_list,
@@ -70,7 +71,7 @@ impl FileBrowser {
         if let Some(ref mut searcher) = self.background_searcher {
             let messages = searcher.try_recv();
             let mut files_added = 0;
-            
+
             for message in messages {
                 match message {
                     crate::search::background::SearchMessage::FileFound(file) => {
@@ -87,12 +88,12 @@ impl FileBrowser {
                     }
                 }
             }
-            
+
             if files_added > 0 {
                 let current_count = self.file_list.get_original_count();
                 self.header.update_file_count(current_count);
             }
-            
+
             // Update spinner animation
             if !searcher.is_complete {
                 self.header.tick();
