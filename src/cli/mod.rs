@@ -68,7 +68,10 @@ fn launch_file_browser(directory: &str, config: &MarkConfig, show_all: bool) -> 
             // User quit without selecting a file
             Ok(())
         }
-        Err(e) => Err(e),
+        Err(e) => {
+            ui::restore()?;
+            Err(e)
+        }
     }
 }
 
