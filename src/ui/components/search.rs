@@ -5,7 +5,7 @@ use ratatui::{
     widgets::Paragraph,
     Frame,
 };
-use std::time::{Duration, Instant};
+use std::time::{Instant};
 
 pub struct SearchBar {
     active: bool,

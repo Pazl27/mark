@@ -5,6 +5,7 @@ use ratatui::{
     widgets::Paragraph,
     Frame,
 };
+use crate::ui::components::spinner::Spinner;
 
 pub struct Header {
     title: String,
@@ -12,6 +13,8 @@ pub struct Header {
     original_count: usize,
     search_query: String,
     is_searching: bool,
+    is_loading: bool,
+    spinner: Spinner,
 }
 
 impl Header {
@@ -22,6 +25,8 @@ impl Header {
             original_count: file_count,
             search_query: String::new(),
             is_searching: false,
+            is_loading: false,
+            spinner: Spinner::new(),
         }
     }
 
@@ -40,6 +45,21 @@ impl Header {
         } else {
             self.file_count = original_count;
         }
+    }
+
+    pub fn set_loading(&mut self, is_loading: bool) {
+        self.is_loading = is_loading;
+    }
+
+    pub fn update_file_count(&mut self, count: usize) {
+        self.file_count = count;
+        if !self.is_searching || self.search_query.is_empty() {
+            self.original_count = count;
+        }
+    }
+
+    pub fn tick(&mut self) {
+        self.spinner.tick();
     }
 
     pub fn render(&self, frame: &mut Frame, area: Rect) {
@@ -96,7 +116,7 @@ impl Header {
 
             // File count info with search query if applicable
             let count_line = if self.is_searching && !self.search_query.is_empty() {
-                Line::from(vec![
+                let mut spans = vec![
                     Span::styled(
                         format!("  {} elements | ", self.original_count),
                         Style::default().fg(Color::Rgb(100, 100, 100)), // Greyed out original count
@@ -105,12 +125,24 @@ impl Header {
                         format!("{} \"{}\"", self.file_count, self.search_query),
                         Style::default().fg(Color::Rgb(150, 150, 150)), // Normal color for filtered count
                     ),
-                ])
+                ];
+                if self.is_loading {
+                    spans.push(Span::raw(" "));
+                    spans.push(self.spinner.render_inline());
+                }
+                Line::from(spans)
             } else {
-                Line::from(Span::styled(
-                    format!("  {} elements", self.file_count),
-                    Style::default().fg(Color::Rgb(150, 150, 150)),
-                ))
+                let mut spans = vec![
+                    Span::styled(
+                        format!("  {} elements", self.file_count),
+                        Style::default().fg(Color::Rgb(150, 150, 150)),
+                    ),
+                ];
+                if self.is_loading {
+                    spans.push(Span::raw(" "));
+                    spans.push(self.spinner.render_inline());
+                }
+                Line::from(spans)
             };
             let count = Paragraph::new(count_line).alignment(Alignment::Left);
 

@@ -270,6 +270,26 @@ impl FileList {
         self.files.len()
     }
 
+    pub fn add_file(&mut self, file: MarkdownFile) {
+        self.files.push(file.clone());
+        
+        // If we're currently searching, also check if this file matches the search
+        if self.is_searching && !self.search_query.is_empty() {
+            let matcher = SkimMatcherV2::default();
+            if matcher.fuzzy_match(&file.name, remove_whitespace(&self.search_query).as_str()).is_some() {
+                self.filtered_files.push(file);
+            }
+        } else if self.is_searching {
+            // If searching but no query yet, add to filtered files too
+            self.filtered_files.push(file);
+        }
+        
+        // If this is the first file and nothing is selected, select it
+        if self.files.len() == 1 && self.state.selected().is_none() {
+            self.state.select(Some(0));
+        }
+    }
+
     pub fn select_first(&mut self) {
         if self.is_searching && !self.filtered_files.is_empty() {
             self.state.select(Some(0));

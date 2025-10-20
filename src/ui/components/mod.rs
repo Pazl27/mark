@@ -4,6 +4,7 @@ pub mod help;
 pub mod help_popup;
 pub mod pagination;
 pub mod search;
+pub mod spinner;
 
 pub use file_list::FileList;
 pub use header::Header;
@@ -11,3 +12,4 @@ pub use help::Help;
 pub use help_popup::HelpPopup;
 pub use pagination::Pagination;
 pub use search::SearchBar;
+pub use spinner::Spinner;

@@ -1,5 +1,5 @@
 use crate::error::Result;
-use crate::search::MarkdownFile;
+use crate::search::{background::BackgroundSearcher, MarkdownFile};
 use crate::ui::components::{FileList, Header, Help, HelpPopup, Pagination, SearchBar};
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::{
@@ -15,6 +15,7 @@ pub struct FileBrowser {
     search_bar: SearchBar,
     should_quit: bool,
     last_key_was_g: bool,
+    background_searcher: Option<BackgroundSearcher>,
 }
 
 impl FileBrowser {
@@ -34,6 +35,68 @@ impl FileBrowser {
             search_bar,
             should_quit: false,
             last_key_was_g: false,
+            background_searcher: None,
+        }
+    }
+
+    pub fn new_with_background_search(
+        directory: &str,
+        ignored_dirs: Vec<String>,
+        show_hidden: bool,
+        show_all: bool,
+    ) -> Result<Self> {
+        let file_list = FileList::new(Vec::new());
+        let mut header = Header::new(0);
+        header.set_loading(true);
+        let help = Help::new();
+        let help_popup = HelpPopup::new();
+        let search_bar = SearchBar::new();
+
+        let background_searcher = BackgroundSearcher::new(directory, ignored_dirs, show_hidden, show_all)?;
+
+        Ok(Self {
+            file_list,
+            header,
+            help,
+            help_popup,
+            search_bar,
+            should_quit: false,
+            last_key_was_g: false,
+            background_searcher: Some(background_searcher),
+        })
+    }
+
+    pub fn update_background_search(&mut self) {
+        if let Some(ref mut searcher) = self.background_searcher {
+            let messages = searcher.try_recv();
+            let mut files_added = 0;
+            
+            for message in messages {
+                match message {
+                    crate::search::background::SearchMessage::FileFound(file) => {
+                        self.file_list.add_file(file);
+                        files_added += 1;
+                    }
+                    crate::search::background::SearchMessage::Finished => {
+                        self.header.set_loading(false);
+                        break;
+                    }
+                    crate::search::background::SearchMessage::Error(_) => {
+                        self.header.set_loading(false);
+                        break;
+                    }
+                }
+            }
+            
+            if files_added > 0 {
+                let current_count = self.file_list.get_original_count();
+                self.header.update_file_count(current_count);
+            }
+            
+            // Update spinner animation
+            if !searcher.is_complete {
+                self.header.tick();
+            }
         }
     }
 
@@ -201,6 +264,9 @@ impl FileBrowser {
 
     pub fn render(&mut self, frame: &mut Frame) {
         let size = frame.area();
+
+        // Update background search first
+        self.update_background_search();
 
         // Update items per page based on screen size
         self.file_list.update_items_per_page(size.height as usize);

@@ -1,7 +1,11 @@
 pub mod markdown;
+pub mod background;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod background_tests;
 
 use std::env;
 use std::path::PathBuf;
